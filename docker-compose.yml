@@ -1405,19 +1405,24 @@ services:
     - ./authentik-certs:/certs
 
   appapi-dsp-harp:
-    # todo
-    image: nextcloud-appapi-harp:latest
+    image: ghcr.io/nextcloud/nextcloud-appapi-harp:latest
     container_name: nextcloud-appapi-harp
-    network_mode: ${NETWORK_MODE:-master_default}
-    ports:
-      - "${EXAPPS_HTTP_PORT:-8780}:8780"
-      - "${EXAPPS_FRP_PORT:-8782}:8782"
+    network_mode: ${HP_NETWORK_MODE:-master_default}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8780:8780"
+      - "8781:8781"
+      - "8782:8782"
     environment:
-      - NC_HARP_SHARED_KEY=${NC_HAPROXY_SHARED_KEY:-some_very_secure_password}
-      - NC_INSTANCE_URL=${NC_INSTANCE_URL:-http://nextcloud.local}
-      - HP_FRP_DISABLE_TLS=${HP_FRP_DISABLE_TLS:-true}
+      - HP_SHARED_KEY=${HP_SHARED_KEY:-some_very_secure_password}
+      - NC_INSTANCE_URL=${HP_NC_INSTANCE_URL:-http://nextcloud.local}
+      - HP_FRP_DISABLE_TLS=${HP_FRP_DISABLE_TLS:-false}
+      - HP_EXAPPS_ADDRESS=${HP_EXAPPS_ADDRESS:-"0.0.0.0:8780"}
+      - HP_EXAPPS_HTTPS_ADDRESS=${HP_EXAPPS_HTTPS_ADDRESS:-"0.0.0.0:8781"}
+      - HP_FRP_ADDRESS=${HP_FRP_ADDRESS:-"0.0.0.0:8782"}
+      - HP_LOG_LEVEL=${HP_LOG_LEVEL:-info}
+      - HP_VERBOSE_START=${HP_VERBOSE_START:-1}
 
 volumes:
   data:
