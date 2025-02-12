@@ -1404,6 +1404,21 @@ services:
     - ./authentik-custom-templates:/templates
     - ./authentik-certs:/certs
 
+  appapi-dsp-harp:
+    # todo
+    image: nextcloud-appapi-harp:latest
+    container_name: nextcloud-appapi-harp
+    network_mode: ${NETWORK_MODE:-master_default}
+    ports:
+      - "${EXAPPS_HTTP_PORT:-8780}:8780"
+      - "${EXAPPS_FRP_PORT:-8782}:8782"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - NC_HARP_SHARED_KEY=${NC_HAPROXY_SHARED_KEY:-some_very_secure_password}
+      - NC_INSTANCE_URL=${NC_INSTANCE_URL:-http://nextcloud.local}
+      - HP_FRP_DISABLE_TLS=${HP_FRP_DISABLE_TLS:-true}
+
 volumes:
   data:
   config:
