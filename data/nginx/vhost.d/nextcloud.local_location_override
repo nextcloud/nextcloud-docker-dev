@@ -1,8 +1,0 @@
-location / {
-  proxy_pass http://nextcloud.local;
-}
-
-location /exapps/ {
-  proxy_pass http://appapi-dsp-harp:8780;
-}
-
