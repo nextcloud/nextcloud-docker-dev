@@ -1404,12 +1404,13 @@ services:
     - ./authentik-custom-templates:/templates
     - ./authentik-certs:/certs
 
-  appapi-dsp-harp:
+  appapi-harp:
     image: ghcr.io/nextcloud/nextcloud-appapi-harp:latest
     container_name: nextcloud-appapi-harp
     network_mode: ${HP_NETWORK_MODE:-master_default}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ${CERT_PATH:-./data/ssl/harp/}:/certs
     ports:
       - "8780:8780"
       - "8781:8781"
