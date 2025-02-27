@@ -1424,6 +1424,7 @@ services:
       - HP_FRP_ADDRESS=${HP_FRP_ADDRESS:-0.0.0.0:8782}
       - HP_LOG_LEVEL=${HP_LOG_LEVEL:-info}
       - HP_VERBOSE_START=${HP_VERBOSE_START:-1}
+      - HP_SESSION_LIFETIME=${HP_SESSION_LIFETIME:-3}
 
 volumes:
   data:
