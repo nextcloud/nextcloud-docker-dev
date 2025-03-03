@@ -1406,7 +1406,7 @@ services:
 
   appapi-harp:
     image: ghcr.io/nextcloud/nextcloud-appapi-harp:latest
-    container_name: nextcloud-appapi-harp
+    container_name: appapi-harp
     network_mode: ${HP_NETWORK_MODE:-master_default}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
