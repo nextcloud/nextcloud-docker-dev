@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-APPS_TO_INSTALL=(viewer recommendations files_pdfviewer profiler hmr_enabler circles)
+APPS_TO_INSTALL=(viewer recommendations files_pdfviewer profiler hmr_enabler circles globalsiteselector)
 NEXTCLOUD_AUTOINSTALL_APPS=(viewer profiler hmr_enabler)
 SERVER_CLONE=squashed
 APPS_CLONE_FILTER=

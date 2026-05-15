@@ -66,6 +66,10 @@ $CONFIG=[
 	'log.condition' => [
         'apps' => ['diagnostics', 'admin_audit'],
 	],
+
+    // federation and globalscale to work with self-signed certificates
+    'sharing.federation.allowSelfSignedCertificates' => true,
+    'gss.selfsigned.allow' => true,
 ];
 
 

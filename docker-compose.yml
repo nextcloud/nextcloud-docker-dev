@@ -57,6 +57,7 @@ services:
           - portal${DOMAIN_SUFFIX}
           - gs1${DOMAIN_SUFFIX}
           - gs2${DOMAIN_SUFFIX}
+          - gs3${DOMAIN_SUFFIX}
           - lookup${DOMAIN_SUFFIX}
           - elasticsearch${DOMAIN_SUFFIX}
           - elasticsearch-ui${DOMAIN_SUFFIX}
@@ -85,6 +86,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: "nextcloud${DOMAIN_SUFFIX}"
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       BLACKFIRE_CLIENT_ID:
@@ -114,6 +116,7 @@ services:
     environment:
       SQL: ${SQL:-mysql}
       VIRTUAL_HOST: "nextcloud2${DOMAIN_SUFFIX}"
+      PROTOCOL: ${PROTOCOL:-https}
       PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
     volumes:
       - '${REPO_PATH_SERVER}:/var/www/html'
@@ -140,6 +143,7 @@ services:
     environment:
       SQL: ${SQL:-mysql}
       VIRTUAL_HOST: "nextcloud3${DOMAIN_SUFFIX}"
+      PROTOCOL: ${PROTOCOL:-https}
       PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
     volumes:
       - '${REPO_PATH_SERVER}:/var/www/html'
@@ -167,6 +171,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable16${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
@@ -196,6 +201,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable17${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
@@ -225,6 +231,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable18${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
@@ -254,6 +261,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable19${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
@@ -283,6 +291,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable20${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
@@ -312,6 +321,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable21${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -342,6 +352,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable22${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -372,6 +383,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable23${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -402,6 +414,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable24${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -432,6 +445,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable25${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -462,6 +476,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable26${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -492,6 +507,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable27${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -522,6 +538,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable28${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -552,6 +569,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable29${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -582,6 +600,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable30${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -612,6 +631,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable31${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -642,6 +662,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable32${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -672,6 +693,7 @@ services:
       NEXTCLOUD_AUTOINSTALL_APPS:
       WITH_REDIS: "YES"
       VIRTUAL_HOST: stable33${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
       ADDITIONAL_APPS_PATH:
       NEXTCLOUD_TRUSTED_DOMAINS:
       PRIMARY: ${PRIMARY:-local}
@@ -887,17 +909,18 @@ services:
       aliasgroup1: http://nextcloud${DOMAIN_SUFFIX}
       aliasgroup2: http://gs1${DOMAIN_SUFFIX}
       aliasgroup3: http://gs2${DOMAIN_SUFFIX}
-      aliasgroup4: http://stable20${DOMAIN_SUFFIX}
-      aliasgroup5: http://stable24${DOMAIN_SUFFIX}
-      aliasgroup6: http://stable25${DOMAIN_SUFFIX}
-      aliasgroup7: http://stable26${DOMAIN_SUFFIX}
-      aliasgroup8: http://stable27${DOMAIN_SUFFIX}
-      aliasgroup9: http://stable28${DOMAIN_SUFFIX}
-      aliasgroup10: http://stable29${DOMAIN_SUFFIX}
-      aliasgroup11: http://stable30${DOMAIN_SUFFIX}
-      aliasgroup12: http://stable31${DOMAIN_SUFFIX}
-      aliasgroup13: http://stable32${DOMAIN_SUFFIX}
-      aliasgroup14: http://stable33${DOMAIN_SUFFIX}
+      aliasgroup4: http://gs3${DOMAIN_SUFFIX}
+      aliasgroup5: http://stable20${DOMAIN_SUFFIX}
+      aliasgroup6: http://stable24${DOMAIN_SUFFIX}
+      aliasgroup7: http://stable25${DOMAIN_SUFFIX}
+      aliasgroup8: http://stable26${DOMAIN_SUFFIX}
+      aliasgroup9: http://stable27${DOMAIN_SUFFIX}
+      aliasgroup10: http://stable28${DOMAIN_SUFFIX}
+      aliasgroup11: http://stable29${DOMAIN_SUFFIX}
+      aliasgroup12: http://stable30${DOMAIN_SUFFIX}
+      aliasgroup13: http://stable31${DOMAIN_SUFFIX}
+      aliasgroup14: http://stable32${DOMAIN_SUFFIX}
+      aliasgroup15: http://stable33${DOMAIN_SUFFIX}
       dictionaries: de_DE en_US en_GB
       username: admin
       password: admin
@@ -1033,13 +1056,16 @@ services:
       VIRTUAL_HOST: portal${DOMAIN_SUFFIX}
       SQL: 'mysql'
       GS_MODE: master
+      PROTOCOL: ${PROTOCOL:-https}
     volumes:
-      - '${STABLE_ROOT_PATH}/server:/var/www/html'
-      - '${STABLE_ROOT_PATH}/server/apps-extra:/var/www/html/apps-extra'
+      - '${REPO_PATH_SERVER}:/var/www/html'
+      - '${REPO_PATH_SERVER}/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
       - /var/www/html/data
       - /var/www/html/config
       - ./data/skeleton/:/skeleton
       - ./data/additional.config.php:/var/www/html/config/additional.config.php:ro
+      - ./data/shared:/shared
     depends_on:
       - ${PROXY_SERVICE:-proxy}
       - database-${SQL:-mysql}
@@ -1052,16 +1078,23 @@ services:
   gs1:
     image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
     environment:
-      VIRTUAL_HOST: gs1${DOMAIN_SUFFIX}
       SQL: 'mysql'
+      NEXTCLOUD_AUTOINSTALL: ${NEXTCLOUD_AUTOINSTALL:-YES}
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      VIRTUAL_HOST: gs1${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
       GS_MODE: slave
     volumes:
-      - '${STABLE_ROOT_PATH}/server:/var/www/html'
-      - '${STABLE_ROOT_PATH}/server/apps-extra:/var/www/html/apps-extra'
+      - '${REPO_PATH_SERVER}:/var/www/html'
+      - '${REPO_PATH_SERVER}/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
       - /var/www/html/data
       - /var/www/html/config
       - ./data/skeleton/:/skeleton
       - ./data/additional.config.php:/var/www/html/config/additional.config.php:ro
+      - ./data/shared:/shared
     depends_on:
       - ${PROXY_SERVICE:-proxy}
       - portal
@@ -1075,16 +1108,53 @@ services:
   gs2:
     image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
     environment:
-      VIRTUAL_HOST: gs2${DOMAIN_SUFFIX}
       SQL: 'mysql'
+      NEXTCLOUD_AUTOINSTALL: ${NEXTCLOUD_AUTOINSTALL:-YES}
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      VIRTUAL_HOST: gs2${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
       GS_MODE: slave
     volumes:
-      - '${STABLE_ROOT_PATH}/server:/var/www/html'
-      - '${STABLE_ROOT_PATH}/server/apps-extra:/var/www/html/apps-extra'
+      - '${REPO_PATH_SERVER}:/var/www/html'
+      - '${REPO_PATH_SERVER}/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
       - /var/www/html/data
       - /var/www/html/config
       - ./data/skeleton/:/skeleton
       - ./data/additional.config.php:/var/www/html/config/additional.config.php:ro
+      - ./data/shared:/shared
+    depends_on:
+      - ${PROXY_SERVICE:-proxy}
+      - portal
+      - database-${SQL:-mysql}
+      - lookup
+      - redis
+      - mail
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  gs3:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: 'mysql'
+      NEXTCLOUD_AUTOINSTALL: ${NEXTCLOUD_AUTOINSTALL:-YES}
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      VIRTUAL_HOST: gs3${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      GS_MODE: slave
+    volumes:
+      - '${REPO_PATH_SERVER}:/var/www/html'
+      - '${REPO_PATH_SERVER}/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - ./data/skeleton/:/skeleton
+      - ./data/additional.config.php:/var/www/html/config/additional.config.php:ro
+      - ./data/shared:/shared
     depends_on:
       - ${PROXY_SERVICE:-proxy}
       - portal
@@ -1099,6 +1169,7 @@ services:
     image: ghcr.io/juliusknorr/nextcloud-dev-lookupserver:latest
     environment:
       VIRTUAL_HOST: "lookup${DOMAIN_SUFFIX}"
+      PROTOCOL: ${PROTOCOL:-https}
     # volumes:
     #  - '${STABLE_ROOT_PATH}/lookupserver:/var/www/html'
     extra_hosts:
@@ -1240,6 +1311,7 @@ services:
     - ./authentik-media:/media
     - ./authentik-certs:/certs
     - ./authentik-custom-templates:/templates
+    - ./authentik-blueprints:/blueprints/z_custom
 
   authentik:
     command: server
@@ -1256,6 +1328,7 @@ services:
       AUTHENTIK_SECRET_KEY: authentik-secret
       VIRTUAL_HOST: "authentik${DOMAIN_SUFFIX}"
       VIRTUAL_PORT: 9000
+      PROTOCOL: ${PROTOCOL:-https}
     image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2025.10.2}
     ports:
       - ${COMPOSE_PORT_HTTP:-9000}:9000
@@ -1263,6 +1336,7 @@ services:
     volumes:
     - ./authentik-media:/media
     - ./authentik-custom-templates:/templates
+    - ./authentik-certs:/certs
 
 volumes:
   data:

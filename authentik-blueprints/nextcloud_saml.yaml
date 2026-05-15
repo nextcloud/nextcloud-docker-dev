@@ -1,0 +1,298 @@
+metadata:
+  name: "nextcloud.local SAML"
+  labels:
+    blueprints.goauthentik.io/instantiate: "true"
+context: {}
+entries:
+- attrs:
+    name: Authentik
+    certificate_data: |
+      -----BEGIN CERTIFICATE-----
+      MIIE5DCCAsygAwIBAgIQQwV9AoKySzWn+vejIypIhzANBgkqhkiG9w0BAQsFADAe
+      MRwwGgYDVQQDDBNhdXRoZW50aWsgMjAyNS4xMC4yMB4XDTI2MDMwNzEyNTcyNloX
+      DTM2MDMwNTEyNTcyNlowPjESMBAGA1UEAwwJQXV0aGVudGlrMRIwEAYDVQQKDAlh
+      dXRoZW50aWsxFDASBgNVBAsMC1NlbGYtc2lnbmVkMIICIjANBgkqhkiG9w0BAQEF
+      AAOCAg8AMIICCgKCAgEAwIeRHlF5eL7ZX11oNhR4hfztwHKdl4G6hhyDo3cxIRN8
+      YUVk3IXfpGzR1U7IsnqenrsNzLk//Nw15lpx4Mxr4hsyCzKksKPD5+aNy3otRQbK
+      POL5Fh5m9M7WxiP/uA7xkk1l5tj8ae6Lu6wnK6T4NkePSoBD3tK8NY6nOm4r04r+
+      fWjLNc24RpX+rKZL/YPDgCYaAkooBAoXL9Dcs/RHCfPIgyeGL0YxhyZKFV+kUgQp
+      GQYCZMdvR7waBe7rAK98y47GyQjeVIG/bRu9E/iq0rqwMAgq9rLTgUg0ZieIF1aZ
+      KeoS3bLaXvFDSzr8N2fR7ktkdsyyCqNrUg80n7cY5XKeaVefW2Qub1gj9uzuoyEU
+      2NpzF+L9cbw0kDr5UtsCLwbdKvgQkJ9ATNWUI6EO061mRm7Ty4TyZpAY2klsvDqV
+      bpd/OBl7LWfTaDcxaXaN0mwEv31LkPWmeecVJcqOx26NwFn1WE91cKzlv1atkuDQ
+      8f0xX/RB2GbOSNNyRBViiw5LZUZEnTznOP+orZ8XLqQh6cUYm3KaaskjF+YRCZe0
+      GEKgw8+Oz4Hm82gEww0y9JRguxINn3L9C1WP/X3bWbHi9kiG3Z0BUGHM5Sek2NEf
+      R4HJ6IhQAQwzcosqpiOl4Z7dp6PWJaobjdg2gC2B1ZJXQ18pXtNrvgS88pWenDUC
+      AwEAATANBgkqhkiG9w0BAQsFAAOCAgEAlj2kVi1yKemMsWAKDmWWPXUmKthvU4i8
+      tortBPGKf1ndLZ1doxGhb8hUjFnaupMRG9RgQbehslLVxcIHXYGBmaiiFuAOk3HN
+      GxBZtrCjlaSYDcuKPiM7Ey+gF6Ec5giix4vL/YFPv95gngvMxDrRsGsnyHgB/Cju
+      5IcriJ0DfoGn/VSj+nxCdj2Ju+utyMaXEYM85I5/9c5VyB401gy7FoMkPiqA4kLs
+      r5JhO391R+1hpjcNLbRrUnHmjLsZyGc2paGSD/Rw2dAwOjuG8BuLa+TPrj4/3Y5e
+      2jtGNAF8bHDvLaj+sCPTjm1zmrAkI7jANQ5/hywbmpoSK8Y59OpeyoJqMwLWfLXP
+      7xFEzG7Ovdo/EXOnypcwrPF8keitl7umwAdBkob+ki5REb02Ya7bFwtnbDcsTMfA
+      FDnZfvScUAeBKNJ4uOlS0qQJja/2YP5+9uNuAXAv5/lEEbgMctURG7LdBH5XQNI3
+      E/TjdJhFvV1D4exmhywbdwNBrQVaMP/FXM7cciIqFnuiRX4N+QqhH9oYpFHlGRyb
+      nsfniK20UyatEVNzx7rIB9WLKOKgT8iHTj6JnMLEPlCnQNnSmd9itmPBDJspohQG
+      IkOzQf9at5Xeg1XEn5AjSaGQYFV+G/+gjiG4sO5/o0Nwyc8PXwF42uryX88qqDJJ
+      MokbVpVDSPY=
+      -----END CERTIFICATE-----
+    key_data: |
+      -----BEGIN RSA PRIVATE KEY-----
+      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
+      -----END RSA PRIVATE KEY-----
+  model: authentik_crypto.certificatekeypair
+  identifiers:
+    name: authentik-cert
+- attrs:
+    name: Nextcloud
+    certificate_data: |
+      -----BEGIN CERTIFICATE-----
+      MIIE4TCCAsmgAwIBAgIQJqHXZY3HTR67OsquzTBqmzANBgkqhkiG9w0BAQsFADAe
+      MRwwGgYDVQQDDBNhdXRoZW50aWsgMjAyNS4xMC4yMB4XDTI2MDMwNzEyNTcwNFoX
+      DTM2MDMwNTEyNTcwNFowOzEPMA0GA1UEAwwGUG9ydGFsMRIwEAYDVQQKDAlhdXRo
+      ZW50aWsxFDASBgNVBAsMC1NlbGYtc2lnbmVkMIICIjANBgkqhkiG9w0BAQEFAAOC
+      Ag8AMIICCgKCAgEAuvRuB3P2Si4QwkiARQTxx9B8MEiI6UBjyFHQlOwfi9366mG+
+      /MYu7OqDfmFPMYBjxjGL61DSqs0EZCZF3urg8XPrfSNBpkFQ29vGBaUqodDo6xDg
+      CKulaEMc+ROJA2/JQ2i5/rgFEpMdr89ty5AyTucdPpKAlmg5z1aIqVx6O0CPpSjP
+      KIXYLUZATCCD4yBGcPkwwvNEx1gL4O1zTA3oPJmYXMQGEHjxL7MCjBhKp8Kz1rjP
+      MIMY6EU6ng4P2pI0L3gyiZSff0+xHJrT5X5Z5K20A+qsy6iUzs97fvRYWAA4LYJN
+      cdwms7a/EPv0BBIGisC76WYIKX0WwgnYbEtkN7Xn7BfQcdMJA9z4C8VrFrQClhAF
+      swEGHLAvCZ+tCPPbPG5Z5KAe18U5JNECv1L3xbTRO6gi1+qIbfMPQZfkotzYPaIU
+      ab42LR97MMIidVCcTeXcSXi7pWJ57qDqsy+aSGclsIM/7EyyuWyX4KSbCfB+C4WA
+      TC8nI+l2aVff3A6viJx4k2bVQ0JWdPPz2RB85zjkBNPOC2e+UtXPM1s8sJVAyRUO
+      IvHvWGmw/cCsqdb4bV6iWT+6F+i0Hb79O5ZN+s6Kej3pYPDIAHmaGqNSLyeWERPG
+      aQZIZTCvGgmILYEwDoiVmuEi2Ks2b9kDl/wAiMYQtjh2ZUTnaaiF/zeDjIcCAwEA
+      ATANBgkqhkiG9w0BAQsFAAOCAgEAj/vF3Q2EDKb7bOLaIINe1oqvG031UzC5vAUC
+      IutjjQc8HdE7n5+3Jd6FAH9NALmTrvLz10n07xUaoSIoB8m9vydglnKgHMOd/Jg/
+      4VYX+pwEqInNLUd3Ep5y57KwQ3eCg2kzeEHCiacg2DgmbpW2xyGfnJbsq1IDyyY6
+      hyDq8yvzDmetuLd3FGpNYv0NIiMrWLcy8+h2H3HCgNs1A179VvoHV+8QW9kGbTmy
+      f/JLx4O4APD5QUX3vEgkp2yzFWIPaUuNkcpOddB7kYFcAxA620kICDw5t7yylmBZ
+      aamAK2o8tAKAhJ/KixZfj1J2t9BK4pDrPeulOTdhDA3vuao2LXmfP4PUakV7yY1W
+      7YVftwNasY2RXCh+RkIhEABL98VdfRyxTo5pi6KoqMOYVp5/pRNZ6H2Zmpyb8pUZ
+      cBoBHFudoZ/NN5FyuUUk1leX29Ce96YudH4K/e3X+IWiwTBKpQyguYOD4Sh21NmI
+      LFKF2w+9C4heoaFTD+CBoGAilR+4N/RPHlKf6pC5r1XteG+UWtmkHA+BZVt2eOPL
+      laU25MeoifoFGGm6/Rn4QAbDTYPLpFH4GXc8/S1tqrVYZeeSmfVD66Y1Ew8FB6Sz
+      X1HjruX/JewD4aCTJgYBPhS+OJ93in1XYHJd8of21GuePTBHg8fgg/p2yzUB1+ST
+      lUraqIM=
+      -----END CERTIFICATE-----
+    key_data: |
+      -----BEGIN RSA PRIVATE KEY-----
+      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
+      -----END RSA PRIVATE KEY-----
+  model: authentik_crypto.certificatekeypair
+  identifiers:
+    name: nextcloud-cert
+- attrs:
+    acs_url: https://nextcloud.local/index.php/apps/user_saml/saml/acs
+    assertion_valid_not_before: minutes=-5
+    assertion_valid_not_on_or_after: minutes=5
+    audience: https://nextcloud.local/index.php/apps/user_saml/saml/metadata
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+    default_name_id_policy: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent
+    digest_algorithm: http://www.w3.org/2001/04/xmlenc#sha256
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
+    issuer: https://nextcloud.local/index.php/apps/user_saml/saml/metadata
+    logout_method: frontchannel_iframe
+    name: nextcloud-saml
+    name_id_mapping: !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/uid]]
+    property_mappings:
+    - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/upn]]
+    - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/name]]
+    - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/email]]
+    - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/username]]
+    - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/uid]]
+    - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/groups]]
+    - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/ms-windowsaccountname]]
+    session_valid_not_on_or_after: minutes=86400
+    sign_assertion: true
+    signature_algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
+    signing_kp: !Find [authentik_crypto.certificatekeypair, [name, authentik-cert]]
+    sls_binding: redirect
+    sp_binding: post
+    verification_kp: !Find [authentik_crypto.certificatekeypair, [name, nextcloud-cert]]
+  conditions: []
+  identifiers:
+    pk: 1
+  model: authentik_providers_saml.samlprovider
+  permissions: []
+  state: present
+- attrs:
+    name: Portal
+    policy_engine_mode: any
+    provider: 1
+    slug: nextcloud
+  conditions: []
+  identifiers:
+    name: nextcloud
+  model: authentik_core.application
+  permissions: []
+  state: present
+- attrs:
+    name: User Eleven
+    email: user11@example.com
+    password: user11
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user11
+- attrs:
+    name: User Twelve
+    email: user12@example.com
+    password: user12
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user12
+- attrs:
+    name: User Thirteen
+    email: user13@example.com
+    password: user13
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user13
+- attrs:
+    name: User Twenty One
+    email: user21@example.com
+    password: user21
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user21
+- attrs:
+    name: User Twenty Two
+    email: user22@example.com
+    password: user22
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user22
+- attrs:
+    name: User Twenty Three
+    email: user23@example.com
+    password: user23
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user23
+- attrs:
+    name: User Thirty One
+    email: user31@example.com
+    password: user31
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user31
+- attrs:
+    name: User Thirty Two
+    email: user32@example.com
+    password: user32
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user32
+- attrs:
+    name: User Thirty Three
+    email: user33@example.com
+    password: user33
+  model: authentik_core.user
+  state: present
+  identifiers:
+    username: user33
+version: 1

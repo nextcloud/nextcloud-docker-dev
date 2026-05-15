@@ -17,6 +17,7 @@ RUN echo 'mariadb-server mysql-server/root_password password $DBPASSWD' | debcon
     mariadb-server \
     mariadb-client \
     cron \
+    composer \
     unzip && \
     rm -rf /var/lib/apt/lists/*
 
@@ -24,6 +25,7 @@ RUN echo 'mariadb-server mysql-server/root_password password $DBPASSWD' | debcon
 RUN cd /root/ && \
     unzip lookup-server.zip && \
     rm /var/www/html/index.html && \
+    composer u --working-dir lookup-server-master/server/ --ignore-platform-req=ext-* && \
     mv lookup-server-master/server/* /var/www/html/ && \
     cp lookup-server-master/server/.htaccess /var/www/html/ && \
     mv lookup-server-master/mysql.dmp /root/ && \

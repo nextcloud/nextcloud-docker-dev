@@ -16,7 +16,7 @@
 docker compose up -d proxy nextcloud authentik
 ```
 
-The server will be available on [http://authentik.local:9000](http://authentik.local:9000) and you can follow [authentik documentation](https://integrations.goauthentik.io/chat-communication-collaboration/nextcloud/) to understand how to configure Nextcloud with SAML (but also OIDC and LDAP).
+The server will be available on [http://authentik.local](http://authentik.local). It will be automatically configured but you still need to enable the admin account [using the initial setup flow](http://authentik.local/if/flow/initial-setup/).
 
 ## SAML
 

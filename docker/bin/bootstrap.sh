@@ -38,12 +38,16 @@ fatal() {
 OCC() {
 	output "occ" "$@"
 	# shellcheck disable=SC2068
-	sudo -E -u www-data php "$WEBROOT/occ" $@ | indent
+	sudo -E -u www-data php "$WEBROOT/occ" "$@" | indent
 }
 
 is_installed() {
 	STATUS=$(OCC status)
 	[[ "$STATUS" = *"installed: true"* ]] 
+}
+
+is_service_running() {
+	getent hosts "$1" > /dev/null 2>&1
 }
 
 update_permission() {
@@ -117,6 +121,52 @@ wait_for_other_containers() {
 	[ $? -eq 0 ] && output "✅ Database server ready"
 }
 
+configure_saml() {
+	if [[ "$IS_STANDALONE" = "true" ]]; then
+		return 0
+	fi
+
+	if [ "$GS_MODE" = "slave" ]; then
+		return 0
+	fi
+
+	if ! is_service_running "authentik-postgresql"; then
+		output "⏭ Skipping SAML configuration (authentik not running)"
+		return 0
+	fi
+
+	OCC app:enable user_saml --force
+	OCC config:app:set user_saml type --value 'saml'
+
+	if [ "$GS_MODE" = "master" ]; then
+		OCC saml:config:set 1 --idp-singleSignOnService.url 'http://authentik.local/application/saml/portal/sso/binding/redirect/'
+		OCC saml:config:set 1 --idp-singleLogoutService.url 'http://authentik.local/if/session-end/portal/'
+		OCC saml:config:set 1 --idp-entityId 'https://portal.local/index.php/apps/user_saml/saml/metadata'
+	else
+		OCC saml:config:set 1 --idp-singleSignOnService.url 'http://authentik.local/application/saml/nextcloud/sso/binding/redirect/'
+		OCC saml:config:set 1 --idp-singleLogoutService.url 'http://authentik.local/if/session-end/nextcloud/'
+		OCC saml:config:set 1 --idp-entityId 'https://nextcloud.local/index.php/apps/user_saml/saml/metadata'
+	fi
+
+	OCC saml:config:set 1 --general-uid_mapping 'http://schemas.goauthentik.io/2021/02/saml/username'
+	OCC saml:config:set 1 --general-idp0_display_name 'Authentik'
+	OCC saml:config:set 1 --saml-attribute-mapping-email_mapping 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'
+	OCC saml:config:set 1 --saml-attribute-mapping-displayName_mapping 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'
+	OCC saml:config:set 1 --saml-attribute-mapping-group_mapping 'http://schemas.xmlsoap.org/claims/Group'
+	OCC saml:config:set 1 --security-nameIdEncrypted 1
+	OCC saml:config:set 1 --sp-name-id-format 'urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName'
+	OCC saml:config:set 1 --sp-x509cert "'-----BEGIN CERTIFICATE-----MIIE4TCCAsmgAwIBAgIQJqHXZY3HTR67OsquzTBqmzANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNhdXRoZW50aWsgMjAyNS4xMC4yMB4XDTI2MDMwNzEyNTcwNFoXDTM2MDMwNTEyNTcwNFowOzEPMA0GA1UEAwwGUG9ydGFsMRIwEAYDVQQKDAlhdXRoZW50aWsxFDASBgNVBAsMC1NlbGYtc2lnbmVkMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAuvRuB3P2Si4QwkiARQTxx9B8MEiI6UBjyFHQlOwfi9366mG+/MYu7OqDfmFPMYBjxjGL61DSqs0EZCZF3urg8XPrfSNBpkFQ29vGBaUqodDo6xDgCKulaEMc+ROJA2/JQ2i5/rgFEpMdr89ty5AyTucdPpKAlmg5z1aIqVx6O0CPpSjPKIXYLUZATCCD4yBGcPkwwvNEx1gL4O1zTA3oPJmYXMQGEHjxL7MCjBhKp8Kz1rjPMIMY6EU6ng4P2pI0L3gyiZSff0+xHJrT5X5Z5K20A+qsy6iUzs97fvRYWAA4LYJNcdwms7a/EPv0BBIGisC76WYIKX0WwgnYbEtkN7Xn7BfQcdMJA9z4C8VrFrQClhAFswEGHLAvCZ+tCPPbPG5Z5KAe18U5JNECv1L3xbTRO6gi1+qIbfMPQZfkotzYPaIUab42LR97MMIidVCcTeXcSXi7pWJ57qDqsy+aSGclsIM/7EyyuWyX4KSbCfB+C4WATC8nI+l2aVff3A6viJx4k2bVQ0JWdPPz2RB85zjkBNPOC2e+UtXPM1s8sJVAyRUOIvHvWGmw/cCsqdb4bV6iWT+6F+i0Hb79O5ZN+s6Kej3pYPDIAHmaGqNSLyeWERPGaQZIZTCvGgmILYEwDoiVmuEi2Ks2b9kDl/wAiMYQtjh2ZUTnaaiF/zeDjIcCAwEAATANBgkqhkiG9w0BAQsFAAOCAgEAj/vF3Q2EDKb7bOLaIINe1oqvG031UzC5vAUCIutjjQc8HdE7n5+3Jd6FAH9NALmTrvLz10n07xUaoSIoB8m9vydglnKgHMOd/Jg/4VYX+pwEqInNLUd3Ep5y57KwQ3eCg2kzeEHCiacg2DgmbpW2xyGfnJbsq1IDyyY6hyDq8yvzDmetuLd3FGpNYv0NIiMrWLcy8+h2H3HCgNs1A179VvoHV+8QW9kGbTmyf/JLx4O4APD5QUX3vEgkp2yzFWIPaUuNkcpOddB7kYFcAxA620kICDw5t7yylmBZaamAK2o8tAKAhJ/KixZfj1J2t9BK4pDrPeulOTdhDA3vuao2LXmfP4PUakV7yY1W7YVftwNasY2RXCh+RkIhEABL98VdfRyxTo5pi6KoqMOYVp5/pRNZ6H2Zmpyb8pUZcBoBHFudoZ/NN5FyuUUk1leX29Ce96YudH4K/e3X+IWiwTBKpQyguYOD4Sh21NmILFKF2w+9C4heoaFTD+CBoGAilR+4N/RPHlKf6pC5r1XteG+UWtmkHA+BZVt2eOPLlaU25MeoifoFGGm6/Rn4QAbDTYPLpFH4GXc8/S1tqrVYZeeSmfVD66Y1Ew8FB6SzX1HjruX/JewD4aCTJgYBPhS+OJ93in1XYHJd8of21GuePTBHg8fgg/p2yzUB1+STlUraqIM=-----END CERTIFICATE-----'"
+	OCC saml:config:set 1 --sp-privateKey "'-----BEGIN RSA PRIVATE KEY-----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-----END RSA PRIVATE KEY-----'"
+	OCC saml:config:set 1 --idp-x509cert "'-----BEGIN CERTIFICATE-----MIIE5DCCAsygAwIBAgIQQwV9AoKySzWn+vejIypIhzANBgkqhkiG9w0BAQsFADAeMRwwGgYDVQQDDBNhdXRoZW50aWsgMjAyNS4xMC4yMB4XDTI2MDMwNzEyNTcyNloXDTM2MDMwNTEyNTcyNlowPjESMBAGA1UEAwwJQXV0aGVudGlrMRIwEAYDVQQKDAlhdXRoZW50aWsxFDASBgNVBAsMC1NlbGYtc2lnbmVkMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwIeRHlF5eL7ZX11oNhR4hfztwHKdl4G6hhyDo3cxIRN8YUVk3IXfpGzR1U7IsnqenrsNzLk//Nw15lpx4Mxr4hsyCzKksKPD5+aNy3otRQbKPOL5Fh5m9M7WxiP/uA7xkk1l5tj8ae6Lu6wnK6T4NkePSoBD3tK8NY6nOm4r04r+fWjLNc24RpX+rKZL/YPDgCYaAkooBAoXL9Dcs/RHCfPIgyeGL0YxhyZKFV+kUgQpGQYCZMdvR7waBe7rAK98y47GyQjeVIG/bRu9E/iq0rqwMAgq9rLTgUg0ZieIF1aZKeoS3bLaXvFDSzr8N2fR7ktkdsyyCqNrUg80n7cY5XKeaVefW2Qub1gj9uzuoyEU2NpzF+L9cbw0kDr5UtsCLwbdKvgQkJ9ATNWUI6EO061mRm7Ty4TyZpAY2klsvDqVbpd/OBl7LWfTaDcxaXaN0mwEv31LkPWmeecVJcqOx26NwFn1WE91cKzlv1atkuDQ8f0xX/RB2GbOSNNyRBViiw5LZUZEnTznOP+orZ8XLqQh6cUYm3KaaskjF+YRCZe0GEKgw8+Oz4Hm82gEww0y9JRguxINn3L9C1WP/X3bWbHi9kiG3Z0BUGHM5Sek2NEfR4HJ6IhQAQwzcosqpiOl4Z7dp6PWJaobjdg2gC2B1ZJXQ18pXtNrvgS88pWenDUCAwEAATANBgkqhkiG9w0BAQsFAAOCAgEAlj2kVi1yKemMsWAKDmWWPXUmKthvU4i8tortBPGKf1ndLZ1doxGhb8hUjFnaupMRG9RgQbehslLVxcIHXYGBmaiiFuAOk3HNGxBZtrCjlaSYDcuKPiM7Ey+gF6Ec5giix4vL/YFPv95gngvMxDrRsGsnyHgB/Cju5IcriJ0DfoGn/VSj+nxCdj2Ju+utyMaXEYM85I5/9c5VyB401gy7FoMkPiqA4kLsr5JhO391R+1hpjcNLbRrUnHmjLsZyGc2paGSD/Rw2dAwOjuG8BuLa+TPrj4/3Y5e2jtGNAF8bHDvLaj+sCPTjm1zmrAkI7jANQ5/hywbmpoSK8Y59OpeyoJqMwLWfLXP7xFEzG7Ovdo/EXOnypcwrPF8keitl7umwAdBkob+ki5REb02Ya7bFwtnbDcsTMfAFDnZfvScUAeBKNJ4uOlS0qQJja/2YP5+9uNuAXAv5/lEEbgMctURG7LdBH5XQNI3E/TjdJhFvV1D4exmhywbdwNBrQVaMP/FXM7cciIqFnuiRX4N+QqhH9oYpFHlGRybnsfniK20UyatEVNzx7rIB9WLKOKgT8iHTj6JnMLEPlCnQNnSmd9itmPBDJspohQGIkOzQf9at5Xeg1XEn5AjSaGQYFV+G/+gjiG4sO5/o0Nwyc8PXwF42uryX88qqDJJMokbVpVDSPY=-----END CERTIFICATE-----'"
+	OCC saml:config:set 1 --security-signMetadata 1
+	OCC saml:config:set 1 --security-logoutResponseSigned 1
+	OCC saml:config:set 1 --security-logoutRequestSigned 1
+	OCC saml:config:set 1 --security-authnRequestsSigned 1
+	OCC saml:config:set 1 --security-wantAssertionsSigned 1
+	OCC saml:config:set 1 --security-wantNameId 1
+	OCC saml:config:set 1 --security-wantXMLValidation 1
+}
+
 configure_gs() {
 	OCC config:system:set lookup_server --value=""
 
@@ -130,18 +180,31 @@ configure_gs() {
 
 	if [ "$GS_MODE" = "master" ]
 	then
-		OCC app:enable globalsiteselector
+	  tee /var/www/mapping.json << EOF
+{
+  "/^user1/i": "gs1${DOMAIN_SUFFIX}",
+  "/^user2/i": "gs2${DOMAIN_SUFFIX}",
+  "/^user3/i": "gs3${DOMAIN_SUFFIX}"
+}
+EOF
+
+		OCC app:enable globalsiteselector --force
 		OCC config:system:set lookup_server --value "$LOOKUP_SERVER"
 		OCC config:system:set gs.enabled --type boolean --value true
 		OCC config:system:set gss.jwt.key --value 'random-key'
 		OCC config:system:set gss.mode --value 'master'
 		OCC config:system:set gss.master.admin 0 --value 'admin'
 		OCC config:system:set gss.master.csp-allow 0 --value "*${DOMAIN_SUFFIX}"
+		OCC config:system:set 'gss.user.discovery.module' --value '\OCA\GlobalSiteSelector\UserDiscoveryModules\ManualUserMapping'
+		OCC config:system:set 'gss.discovery.manual.mapping.file' --value '/var/www/mapping.json'
+		OCC config:system:set 'gss.discovery.manual.mapping.regex' --type boolean --value true
+		OCC config:system:set 'gss.discovery.manual.mapping.parameter' --value 'http://schemas.goauthentik.io/2021/02/saml/username'
 	fi
 
 	if [ "$GS_MODE" = "slave" ]
 	then
-		OCC app:enable globalsiteselector
+		OCC app:enable globalsiteselector --force
+		OCC app:disable user_oidc
 		OCC config:system:set lookup_server --value "$LOOKUP_SERVER"
 		OCC config:system:set gs.enabled --type boolean --value true
 		OCC config:system:set gs.federation --value 'global'
@@ -225,6 +288,25 @@ configure_add_user() {
 	OCC user:add --password-from-env "$1"
 }
 
+configure_users() {
+  # on globalscale, we create no one
+	if [ "$GS_MODE" = "master" ] || [ "$GS_MODE" = "slave" ]
+	then
+	  return 0
+	fi
+
+ 	configure_add_user user1 &
+ 	configure_add_user user2 &
+ 	configure_add_user user3 &
+ 	configure_add_user user4 &
+ 	configure_add_user user5 &
+ 	configure_add_user user6 &
+ 	configure_add_user jane &
+ 	configure_add_user john &
+ 	configure_add_user alice &
+ 	configure_add_user bob &
+}
+
 
 install() {
 	if [ -n "$VIRTUAL_HOST" ]; then
@@ -288,6 +370,7 @@ install() {
 	configure_gs
 	configure_ldap
 	configure_oidc
+	configure_saml
 
 	output "🔧 Finetuning the configuration"
 	if [ "$WITH_REDIS" != "NO" ]; then
@@ -332,17 +415,7 @@ install() {
 	OCC user:setting admin settings email admin@example.net &
 	INSTANCENAME=$(echo "$VIRTUAL_HOST" | cut -d '.' -f1)
 	configure_add_user "${INSTANCENAME:-nextcloud}" &
-	configure_add_user user1 &
-	configure_add_user user2 &
-	configure_add_user user3 &
-	configure_add_user user4 &
-	configure_add_user user5 &
-	configure_add_user user6 &
-	configure_add_user jane &
-	configure_add_user john &
-	configure_add_user alice &
-	configure_add_user bob &
-
+	configure_users
 	run_hook_after_install
 
 	output "🚀 Finished setup using $SQL database…"
