@@ -1331,7 +1331,7 @@ services:
       PROTOCOL: ${PROTOCOL:-https}
     image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2025.10.2}
     ports:
-      - ${COMPOSE_PORT_HTTP:-9000}:9000
+      - ${COMPOSE_PORT_HTTP:-9002}:9002
     restart: unless-stopped
     volumes:
     - ./authentik-media:/media
