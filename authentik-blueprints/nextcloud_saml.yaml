@@ -5,7 +5,7 @@ metadata:
 context: {}
 entries:
 - attrs:
-    name: Authentik
+    name: Authentik Nextcloud
     certificate_data: |
       -----BEGIN CERTIFICATE-----
       MIIE5DCCAsygAwIBAgIQQwV9AoKySzWn+vejIypIhzANBgkqhkiG9w0BAQsFADAe
@@ -213,7 +213,7 @@ entries:
   permissions: []
   state: present
 - attrs:
-    name: Portal
+    name: Nextcloud
     policy_engine_mode: any
     provider: 1
     slug: nextcloud

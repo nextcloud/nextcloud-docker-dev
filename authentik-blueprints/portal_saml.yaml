@@ -5,7 +5,7 @@ metadata:
 context: {}
 entries:
 - attrs:
-    name: Authentik
+    name: Authentik Portal
     certificate_data: |
       -----BEGIN CERTIFICATE-----
       MIIE5DCCAsygAwIBAgIQQwV9AoKySzWn+vejIypIhzANBgkqhkiG9w0BAQsFADAe
