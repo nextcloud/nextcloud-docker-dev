@@ -72,6 +72,13 @@ configure_xdebug_mode() {
 	fi
 }
 
+configure_profiler() {
+	if [ -f /usr/local/etc/php/conf.d/docker-php-ext-excimer.ini ] && [ "$PHP_EXCIMER_DISABLE" = "true" ]; then
+		output "🔧 Disabling excimer php extension"
+		mv /usr/local/etc/php/conf.d/docker-php-ext-excimer.ini /usr/local/etc/php/conf.d/docker-php-ext-excimer.ini.disabled
+	fi
+}
+
 wait_for_other_containers() {
 	output "⌛ Waiting for other containers"
 	retry_with_timeout() {
@@ -445,6 +452,7 @@ add_hosts() {
 setup() {
 	update_permission
 	configure_xdebug_mode
+	configure_profiler
 
 	if is_installed || [[ ! -f $WEBROOT/config/config.php ]]
 	then
