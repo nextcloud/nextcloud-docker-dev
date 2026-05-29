@@ -82,7 +82,7 @@ if [ -f ".env" ]; then
 		echo "❌ Repository path does not exist"
 	fi
 
-	for i in stable29 stable30 stable31 stable32 stable33
+	for i in stable30 stable31 stable32 stable33 stable34
 	do
 		echo "Stable $i repository path: ${STABLE_ROOT_PATH}/${i}"
 		STABLE_VERSION=$(grep "OC_VersionString" "${STABLE_ROOT_PATH}/${i}/version.php" | cut -d "'" -f 2)

@@ -42,6 +42,7 @@ services:
           - stable31${DOMAIN_SUFFIX}
           - stable32${DOMAIN_SUFFIX}
           - stable33${DOMAIN_SUFFIX}
+          - stable34${DOMAIN_SUFFIX}
           - mail${DOMAIN_SUFFIX}
           - sso${DOMAIN_SUFFIX}
           - minio${DOMAIN_SUFFIX}
@@ -716,6 +717,37 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
 
+  stable34:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-83}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable34${DOMAIN_SUFFIX}
+      PROTOCOL: ${PROTOCOL:-https}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable34:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable34/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/additional.config.php:/var/www/html/config/additional.config.php:ro
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
   database-sqlite:
     image: ghcr.io/juliusknorr/nextcloud-dev-noop:latest
 
@@ -921,6 +953,7 @@ services:
       aliasgroup13: http://stable31${DOMAIN_SUFFIX}
       aliasgroup14: http://stable32${DOMAIN_SUFFIX}
       aliasgroup15: http://stable33${DOMAIN_SUFFIX}
+      aliasgroup16: http://stable34${DOMAIN_SUFFIX}
       dictionaries: de_DE en_US en_GB
       username: admin
       password: admin
