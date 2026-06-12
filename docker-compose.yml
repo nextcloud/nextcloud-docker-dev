@@ -974,8 +974,9 @@ services:
       - VIRTUAL_HOST=elasticsearch${DOMAIN_SUFFIX}
       - VIRTUAL_PORT=9200
       - VIRTUAL_PROTO=http
+    ports:
+      - "9200:9200"
     expose:
-      - 9200
       - 9300
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
