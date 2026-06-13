@@ -80,7 +80,7 @@ services:
       - ./docker/configs/haproxy.conf:/usr/local/etc/haproxy/haproxy.cfg:ro
 
   nextcloud:
-    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-85}:latest
     environment:
       SQL: ${SQL:-mysql}
       NEXTCLOUD_AUTOINSTALL: ${NEXTCLOUD_AUTOINSTALL:-YES}
@@ -113,7 +113,7 @@ services:
       - host.docker.internal:host-gateway
 
   nextcloud2:
-    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-85}:latest
     environment:
       SQL: ${SQL:-mysql}
       VIRTUAL_HOST: "nextcloud2${DOMAIN_SUFFIX}"
@@ -140,7 +140,7 @@ services:
       - host.docker.internal:host-gateway
 
   nextcloud3:
-    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-85}:latest
     environment:
       SQL: ${SQL:-mysql}
       VIRTUAL_HOST: "nextcloud3${DOMAIN_SUFFIX}"
