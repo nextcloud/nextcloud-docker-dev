@@ -1,6 +1,6 @@
 # LDAP
 
-The LDAP sample data is based on <https://github.com/rroemhild/docker-test-openldap> and extended with randomly generated users/groups. For details see [data/ldap-generator/](https://github.com/juliusknorr/nextcloud-docker-dev/tree/master/data/ldap-generator). LDAP will be configured automatically if the ldap container is available during installation.
+The LDAP sample data is based on <https://github.com/rroemhild/docker-test-openldap> and extended with randomly generated users/groups. For details see [data/ldap-generator/](https://github.com/nextcloud/nextcloud-docker-dev/tree/master/data/ldap-generator). LDAP will be configured automatically if the ldap container is available during installation.
 
 Example users are: `leela fry bender zoidberg hermes professor`. The password is the same as the uid.
 

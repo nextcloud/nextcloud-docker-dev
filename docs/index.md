@@ -14,4 +14,4 @@ Various settings in this setup are considered insecure and default passwords and
 - 🚀 Blackfire, Xdebug for profiling and debugging
 - 📄 Lots of integrating service containers: Collabora Online, Onlyoffice, Elasticsearch, ...
 
-Follow the [getting started guide](https://juliusknorr.github.io/nextcloud-docker-dev/basics/getting-started/) or the [Nextcloud developer tutorial](https://nextcloud.com/developer/) to get started.
+Follow the [getting started guide](https://nextcloud.github.io/nextcloud-docker-dev/basics/getting-started/) or the [Nextcloud developer tutorial](https://nextcloud.com/developer/) to get started.
