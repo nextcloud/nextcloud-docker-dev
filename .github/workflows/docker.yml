@@ -15,7 +15,7 @@ jobs:
   push_to_registry:
     name: Build image
     runs-on: ubuntu-latest
-    if: github.repository == 'juliusknorr/nextcloud-docker-dev'
+    if: github.repository == 'nextcloud/nextcloud-docker-dev'
     strategy:
       fail-fast: false
       matrix:
@@ -82,8 +82,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           file: ${{ steps.dockerfile.outputs.DOCKERFILE }}
           tags: |
-            ghcr.io/juliusknorr/nextcloud-dev-${{ matrix.container }}:${{ github.sha }}
-            ghcr.io/juliusknorr/nextcloud-dev-${{ matrix.container }}:latest
+            ghcr.io/nextcloud/nextcloud-dev-${{ matrix.container }}:${{ github.sha }}
+            ghcr.io/nextcloud/nextcloud-dev-${{ matrix.container }}:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
       - name: Push container image
@@ -95,8 +95,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           file: ${{ steps.dockerfile.outputs.DOCKERFILE }}
           tags: |
-            ghcr.io/juliusknorr/nextcloud-dev-${{ matrix.container }}:${{ github.event_name == 'release' && 'release' || 'latest' }}
-            ghcr.io/juliusknorr/nextcloud-dev-${{ matrix.container }}:${{ github.ref_name }}
+            ghcr.io/nextcloud/nextcloud-dev-${{ matrix.container }}:${{ github.event_name == 'release' && 'release' || 'latest' }}
+            ghcr.io/nextcloud/nextcloud-dev-${{ matrix.container }}:${{ github.ref_name }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
       - name: Start containers with docker compose
