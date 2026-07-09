@@ -226,34 +226,7 @@ configure_ldap() {
 		return 0
 	fi
 
-	timeout 5 bash -c 'until echo > /dev/tcp/ldap/389; do sleep 0.5; done' 2>/dev/null
-	if [ $? -eq 0 ]; then
-		output "LDAP server available"
-		export LDAP_USER_FILTER="(|(objectclass=inetOrgPerson))"
-
-		OCC app:enable user_ldap
-		OCC ldap:create-empty-config
-		OCC ldap:set-config s01 ldapAgentName "cn=admin,dc=planetexpress,dc=com"
-		OCC ldap:set-config s01 ldapAgentPassword "admin"
-		OCC ldap:set-config s01 ldapAttributesForUserSearch "sn;givenname"
-		OCC ldap:set-config s01 ldapBase "dc=planetexpress,dc=com"
-		OCC ldap:set-config s01 ldapEmailAttribute "mail"
-		OCC ldap:set-config s01 ldapExpertUsernameAttr "uid"
-		OCC ldap:set-config s01 ldapGroupDisplayName "description"
-		OCC ldap:set-config s01 ldapGroupFilter '(|(objectclass=groupOfNames))'
-		OCC ldap:set-config s01 ldapGroupFilterObjectclass 'groupOfNames'
-		OCC ldap:set-config s01 ldapGroupMemberAssocAttr 'member'
-		OCC ldap:set-config s01 ldapHost 'ldap'
-		OCC ldap:set-config s01 ldapLoginFilter "(&$LDAP_USER_FILTER(uid=%uid))"
-		OCC ldap:set-config s01 ldapLoginFilterMode '1'
-		OCC ldap:set-config s01 ldapLoginFilterUsername '1'
-		OCC ldap:set-config s01 ldapPort '389'
-		OCC ldap:set-config s01 ldapTLS '0'
-		OCC ldap:set-config s01 ldapUserDisplayName 'cn'
-		OCC ldap:set-config s01 ldapUserFilter "$LDAP_USER_FILTER"
-		OCC ldap:set-config s01 ldapUserFilterMode "1"
-		OCC ldap:set-config s01 ldapConfigurationActive "1"
-	fi
+	configure-ldap.sh
 }
 
 configure_oidc() {

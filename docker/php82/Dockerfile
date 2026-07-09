@@ -105,4 +105,4 @@ CMD ["apache2-foreground"]
 
 ADD data/installing.html /root/installing.html
 ADD configs/autoconfig_mysql.php configs/autoconfig_pgsql.php configs/autoconfig_oci.php configs/default.config.php configs/redis.config.php configs/apcu.config.php /root/
-ADD bin/bootstrap.sh bin/occ /usr/local/bin/
+ADD bin/bootstrap.sh bin/occ bin/configure-ldap.sh /usr/local/bin/
