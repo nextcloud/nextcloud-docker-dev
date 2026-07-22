@@ -143,8 +143,8 @@ configure_saml() {
 		OCC saml:config:set 1 --idp-singleLogoutService.url 'http://authentik.local/if/session-end/portal/'
 		OCC saml:config:set 1 --idp-entityId 'https://portal.local/index.php/apps/user_saml/saml/metadata'
 	else
-		OCC saml:config:set 1 --idp-singleSignOnService.url 'http://authentik.local/application/saml/nextcloud/sso/binding/redirect/'
-		OCC saml:config:set 1 --idp-singleLogoutService.url 'http://authentik.local/if/session-end/nextcloud/'
+		OCC saml:config:set 1 --idp-singleSignOnService.url 'http://authentik.local/application/saml/nextcloud-saml-local/sso/binding/redirect/'
+		OCC saml:config:set 1 --idp-singleLogoutService.url 'http://authentik.local/if/session-end/nextcloud-saml-local/'
 		OCC saml:config:set 1 --idp-entityId 'https://nextcloud.local/index.php/apps/user_saml/saml/metadata'
 	fi
 
@@ -191,7 +191,7 @@ EOF
 		OCC app:enable globalsiteselector --force
 		OCC config:system:set lookup_server --value "$LOOKUP_SERVER"
 		OCC config:system:set gs.enabled --type boolean --value true
-		OCC config:system:set gss.jwt.key --value 'random-key'
+		OCC config:system:set gss.jwt.key --value 'random-key-but-super-long-because-this-is-required'
 		OCC config:system:set gss.mode --value 'master'
 		OCC config:system:set gss.master.admin 0 --value 'admin'
 		OCC config:system:set gss.master.csp-allow 0 --value "*${DOMAIN_SUFFIX}"
@@ -208,7 +208,7 @@ EOF
 		OCC config:system:set lookup_server --value "$LOOKUP_SERVER"
 		OCC config:system:set gs.enabled --type boolean --value true
 		OCC config:system:set gs.federation --value 'global'
-		OCC config:system:set gss.jwt.key --value 'random-key'
+		OCC config:system:set gss.jwt.key --value 'random-key-but-super-long-because-this-is-required'
 		OCC config:system:set gss.mode --value 'slave'
 		OCC config:system:set gss.master.url --value "$MASTER_SERVER"
 	fi

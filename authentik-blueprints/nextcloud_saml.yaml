@@ -4,6 +4,9 @@ metadata:
     blueprints.goauthentik.io/instantiate: "true"
 context: {}
 entries:
+
+# SAML
+
 - attrs:
     name: Authentik Nextcloud
     certificate_data: |
@@ -90,7 +93,7 @@ entries:
       -----END RSA PRIVATE KEY-----
   model: authentik_crypto.certificatekeypair
   identifiers:
-    name: authentik-cert
+    name: authentik-cert-local
 - attrs:
     name: Nextcloud
     certificate_data: |
@@ -177,7 +180,7 @@ entries:
       -----END RSA PRIVATE KEY-----
   model: authentik_crypto.certificatekeypair
   identifiers:
-    name: nextcloud-cert
+    name: nextcloud-cert-local
 - attrs:
     acs_url: https://nextcloud.local/index.php/apps/user_saml/saml/acs
     assertion_valid_not_before: minutes=-5
@@ -189,7 +192,7 @@ entries:
     invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
     issuer: https://nextcloud.local/index.php/apps/user_saml/saml/metadata
     logout_method: frontchannel_iframe
-    name: nextcloud-saml
+    name: nextcloud-saml-local
     name_id_mapping: !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/uid]]
     property_mappings:
     - !Find [authentik_providers_saml.samlpropertymapping, [managed, goauthentik.io/providers/saml/upn]]
@@ -202,97 +205,95 @@ entries:
     session_valid_not_on_or_after: minutes=86400
     sign_assertion: true
     signature_algorithm: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
-    signing_kp: !Find [authentik_crypto.certificatekeypair, [name, authentik-cert]]
+    signing_kp: !Find [authentik_crypto.certificatekeypair, [name, authentik-cert-local]]
     sls_binding: redirect
     sp_binding: post
-    verification_kp: !Find [authentik_crypto.certificatekeypair, [name, nextcloud-cert]]
+    verification_kp: !Find [authentik_crypto.certificatekeypair, [name, nextcloud-cert-local]]
   conditions: []
   identifiers:
-    pk: 1
+    name: nextcloud-saml-local
   model: authentik_providers_saml.samlprovider
   permissions: []
   state: present
 - attrs:
-    name: Nextcloud
+    name: Nextcloud SAML
     policy_engine_mode: any
-    provider: 1
-    slug: nextcloud
+    provider: !Find [authentik_providers_saml.samlprovider, [name, nextcloud-saml-local]]
+    slug: nextcloud-saml-local
   conditions: []
   identifiers:
     name: nextcloud
   model: authentik_core.application
   permissions: []
   state: present
+
+# LDAP
+
 - attrs:
-    name: User Eleven
-    email: user11@example.com
-    password: user11
-  model: authentik_core.user
+    authorization_flow: !Find [authentik_flows.flow, [slug, default-authentication-flow]]
+    base_dn: DC=ldap,DC=goauthentik,DC=io
+    bind_mode: cached
+    gid_start_number: 4000
+    invalidation_flow: !Find [authentik_flows.flow, [slug, default-invalidation-flow]]
+    mfa_support: true
+    name: Provider for Nextcloud LDAP
+    search_mode: cached
+    uid_start_number: 2000
+  conditions: []
+  model: authentik_providers_ldap.ldapprovider
+  permissions: []
   state: present
   identifiers:
-    username: user11
+    pk: 20
+
 - attrs:
-    name: User Twelve
-    email: user12@example.com
-    password: user12
-  model: authentik_core.user
-  state: present
+    name: Nextcloud LDAP
+    policy_engine_mode: any
+    provider: 20
+    slug: nextcloud-ldap
+  conditions: []
   identifiers:
-    username: user12
-- attrs:
-    name: User Thirteen
-    email: user13@example.com
-    password: user13
-  model: authentik_core.user
+    name: nextcloud-ldap
+  model: authentik_core.application
+  permissions: []
   state: present
-  identifiers:
-    username: user13
-- attrs:
-    name: User Twenty One
-    email: user21@example.com
-    password: user21
-  model: authentik_core.user
-  state: present
-  identifiers:
-    username: user21
-- attrs:
-    name: User Twenty Two
-    email: user22@example.com
-    password: user22
-  model: authentik_core.user
-  state: present
-  identifiers:
-    username: user22
-- attrs:
-    name: User Twenty Three
-    email: user23@example.com
-    password: user23
-  model: authentik_core.user
-  state: present
-  identifiers:
-    username: user23
-- attrs:
-    name: User Thirty One
-    email: user31@example.com
-    password: user31
-  model: authentik_core.user
-  state: present
-  identifiers:
-    username: user31
-- attrs:
-    name: User Thirty Two
-    email: user32@example.com
-    password: user32
-  model: authentik_core.user
-  state: present
-  identifiers:
-    username: user32
-- attrs:
-    name: User Thirty Three
-    email: user33@example.com
-    password: user33
-  model: authentik_core.user
-  state: present
-  identifiers:
-    username: user33
+
+#- attrs:
+#    config:
+#      authentik_host: http://authentik.local/
+#      authentik_host_browser: ''
+#      authentik_host_insecure: false
+#      container_image: null
+#      docker_labels: null
+#      docker_map_ports: true
+#      docker_network: null
+#      kubernetes_disabled_components: []
+#      kubernetes_httproute_annotations: {}
+#      kubernetes_httproute_parent_refs: []
+#      kubernetes_image_pull_secrets: []
+#      kubernetes_ingress_annotations: {}
+#      kubernetes_ingress_class_name: null
+#      kubernetes_ingress_path_type: null
+#      kubernetes_ingress_secret_name: authentik-outpost-tls
+#      kubernetes_json_patches: null
+#      kubernetes_namespace: default
+#      kubernetes_replicas: 1
+#      kubernetes_service_type: ClusterIP
+#      log_level: info
+#      object_naming_template: ak-outpost-%(name)s
+#      refresh_interval: minutes=5
+#    managed: null
+#    name: Nextcloud LDAP
+#    providers:
+#    - 20
+#    service_connection: !Find [authentik_outposts.dockerserviceconnection, [name, Local Docker connection]]
+#    type: ldap
+#  conditions: []
+#  model: authentik_outposts.outpost
+#  permissions: []
+#  state: present
+#  identifiers:
+#    pk: 82b825ba-dcb8-44dc-9519-2c4f4f2491c5
+
+
 version: 1
