@@ -784,7 +784,7 @@ services:
     image: ghcr.io/nextcloud/nextcloud-dev-noop:latest
 
   database-mysql:
-    image: mariadb:10.6
+    image: mariadb:12.2
     environment:
       MYSQL_ROOT_PASSWORD: 'nextcloud'
       MYSQL_PASSWORD: 'nextcloud'
