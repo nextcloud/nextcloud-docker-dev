@@ -1404,6 +1404,32 @@ services:
     - ./authentik-custom-templates:/templates
     - ./authentik-certs:/certs
 
+  appapi-harp:
+    image: ghcr.io/nextcloud/nextcloud-appapi-harp:latest
+    container_name: appapi-harp
+    network_mode: ${HP_NETWORK_MODE:-master_default}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CERT_PATH:-./data/ssl/harp/}:/certs
+    ports:
+      - "8780:8780"
+      - "8781:8781"
+      - "8782:8782"
+    environment:
+      - HP_SHARED_KEY=${HP_SHARED_KEY:-some_very_secure_password}
+      - HP_TRUSTED_PROXY_IPS={HP_TRUSTED_PROXY_IPS:-${DOCKER_SUBNET:-192.168.21.0/24}}
+      - NC_INSTANCE_URL=${HP_NC_INSTANCE_URL:-http://nextcloud.local}
+      - HP_FRP_DISABLE_TLS=${HP_FRP_DISABLE_TLS:-false}
+      - HP_EXAPPS_ADDRESS=${HP_EXAPPS_ADDRESS:-0.0.0.0:8780}
+      - HP_EXAPPS_HTTPS_ADDRESS=${HP_EXAPPS_HTTPS_ADDRESS:-0.0.0.0:8781}
+      - HP_FRP_ADDRESS=${HP_FRP_ADDRESS:-0.0.0.0:8782}
+      - HP_LOG_LEVEL=${HP_LOG_LEVEL:-info}
+      - HP_VERBOSE_START=${HP_VERBOSE_START:-1}
+      - HP_WATCHDOG_ENABLED=${HP_WATCHDOG_ENABLED:-true}
+      - HP_BLACKLIST_COUNT=${HP_BLACKLIST_COUNT:-10}
+      - HP_TIMEOUT_CLIENT=${HP_TIMEOUT_CLIENT:-30s}
+      - HP_TIMEOUT_SERVER=${HP_TIMEOUT_SERVER:-1800s}
+
 volumes:
   data:
   config:
