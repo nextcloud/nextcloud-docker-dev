@@ -14,7 +14,7 @@ docker compose up -d appapi-dsp
 
 After the DSP container is running, configure the Deploy daemon in AppAPI admin settings with the following parameters:
 
-- **Host**: `http://nextcloud-appapi-dsp-http:2375`
+- **Host**: `nextcloud-appapi-dsp-http:2375`
 - **Nextcloud URL**: `http://nextcloud.local` (locally always use http)
 - **Enable https**: `false`
 - **Network**: `master_default` (the network of nextcloud-docker-dev docker-compose, by default it is `master_default`)
@@ -47,7 +47,7 @@ docker compose up -d appapi-dsp-https
 
 After the DSP container is running and the certificate is imported in Nextcloud, configure the Deploy daemon in AppAPI admin settings with the following parameters:
 
-- **Host**: `https://<nextcloud-appapi-dsp-https or BIND_ADDRESS IP>:2375` (use host depending on your setup)
+- **Host**: `<nextcloud-appapi-dsp-https or BIND_ADDRESS IP>:2375` (use host depending on your setup)
 - **Nextcloud URL**: `http://nextcloud.local` (locally always use http)
 - **Enable https**: `true`
 - **Network**: `host` (with https enabled, the network is forced to `host`)
