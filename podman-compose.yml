@@ -1,0 +1,1109 @@
+services:
+
+  # Proxy for ssl termination and easier hostname access
+  # SSL certificates with the virtual host name need to be added to ./data/ssl
+  proxy:
+    image: ghcr.io/juliusknorr/nextcloud-dev-nginx:latest
+    ports:
+      - "${IP_BIND:-127.0.0.1}:${PROXY_PORT_HTTP:-80}:80"
+      - "${IP_BIND:-127.0.0.1}:${PROXY_PORT_HTTPS:-443}:443"
+    volumes:
+      - ${DOCKER_SOCKET-/var/run/docker.sock}:/tmp/docker.sock:ro
+      - ./data/ssl/:/etc/nginx/certs
+      - ./data/nginx/vhost.d/:/etc/nginx/vhost.d
+    environment:
+      DHPARAM_BITS: 2048
+      DHPARAM_GENERATION: "false"
+      HTTPS_METHOD: "noredirect"
+      HSTS: "off"
+    cap_add:
+      - SYS_ADMIN
+    networks:
+      default:
+        aliases:
+          - nextcloud${DOMAIN_SUFFIX}
+          - nextcloud2${DOMAIN_SUFFIX}
+          - nextcloud3${DOMAIN_SUFFIX}
+          - stable16${DOMAIN_SUFFIX}
+          - stable17${DOMAIN_SUFFIX}
+          - stable18${DOMAIN_SUFFIX}
+          - stable19${DOMAIN_SUFFIX}
+          - stable20${DOMAIN_SUFFIX}
+          - stable21${DOMAIN_SUFFIX}
+          - stable22${DOMAIN_SUFFIX}
+          - stable23${DOMAIN_SUFFIX}
+          - stable24${DOMAIN_SUFFIX}
+          - stable25${DOMAIN_SUFFIX}
+          - stable26${DOMAIN_SUFFIX}
+          - stable27${DOMAIN_SUFFIX}
+          - stable28${DOMAIN_SUFFIX}
+          - stable29${DOMAIN_SUFFIX}
+          - stable30${DOMAIN_SUFFIX}
+          - stable31${DOMAIN_SUFFIX}
+          - stable32${DOMAIN_SUFFIX}
+          - mail${DOMAIN_SUFFIX}
+          - sso${DOMAIN_SUFFIX}
+          - imap${DOMAIN_SUFFIX}
+          - collabora${DOMAIN_SUFFIX}
+          - codedev${DOMAIN_SUFFIX}
+          - onlyoffice${DOMAIN_SUFFIX}
+          - proxy${DOMAIN_SUFFIX}
+          - hpb${DOMAIN_SUFFIX}
+          - push${DOMAIN_SUFFIX}
+          - keycloak${DOMAIN_SUFFIX}
+          - portal${DOMAIN_SUFFIX}
+          - gs1${DOMAIN_SUFFIX}
+          - gs2${DOMAIN_SUFFIX}
+          - lookup${DOMAIN_SUFFIX}
+          - elasticsearch${DOMAIN_SUFFIX}
+          - elasticsearch-ui${DOMAIN_SUFFIX}
+          - pgadmin${DOMAIN_SUFFIX}
+          - phpmyadmin${DOMAIN_SUFFIX}
+          - talk-signaling${DOMAIN_SUFFIX}
+          - talk-recording${DOMAIN_SUFFIX}
+
+  haproxy:
+    image: haproxy
+    expose:
+      - 80
+    environment:
+      VIRTUAL_HOST: "proxy${DOMAIN_SUFFIX}"
+    volumes:
+      - ./docker/configs/haproxy.conf:/usr/local/etc/haproxy/haproxy.cfg:ro
+
+  nextcloud:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    ports:
+      - 80
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: ${NEXTCLOUD_AUTOINSTALL:-YES}
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: "nextcloud${DOMAIN_SUFFIX}"
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      BLACKFIRE_CLIENT_ID:
+      BLACKFIRE_CLIENT_TOKEN:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${REPO_PATH_SERVER}:/var/www/html'
+      - '${REPO_PATH_SERVER}/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - data:/var/www/html/data
+      - config:/var/www/html/config
+      - apps-writable:/var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  nextcloud2:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: 'mysql'
+      VIRTUAL_HOST: "nextcloud2${DOMAIN_SUFFIX}"
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${REPO_PATH_SERVER}:/var/www/html'
+      - '${REPO_PATH_SERVER}/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - data2:/var/www/html/data
+      - config2:/var/www/html/config
+      - apps-writable2:/var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    ports:
+      - "${IP_BIND:-127.0.0.1}:${PORTBASE:-800}1:80"
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  nextcloud3:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      VIRTUAL_HOST: "nextcloud3${DOMAIN_SUFFIX}"
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${REPO_PATH_SERVER}:/var/www/html'
+      - '${REPO_PATH_SERVER}/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - data3:/var/www/html/data
+      - config3:/var/www/html/config
+      - apps-writable3:/var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable16:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-73}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable16${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable16:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable16/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable17:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-73}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable17${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable17:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable17/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable18:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-74}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable18${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable18:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable18/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable19:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-74}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable19${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable19:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable19/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable20:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-74}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable20${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable20:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable20/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable21:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-80}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable21${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable21:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable21/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable22:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-80}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable22${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable22:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable22/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable23:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-80}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable23${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable23:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable23/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable24:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-80}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable24${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable24:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable24/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable25:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable25${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable25:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable25/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable26:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable26${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable26:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable26/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable27:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable27${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable27:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable27/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable28:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable28${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable28:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable28/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable29:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable29${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable29:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable29/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable30:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable30${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable30:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable30/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable31:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable31${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable31:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable31/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  stable32:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      SQL: ${SQL:-mysql}
+      NEXTCLOUD_AUTOINSTALL: "YES"
+      NEXTCLOUD_AUTOINSTALL_APPS:
+      WITH_REDIS: "YES"
+      VIRTUAL_HOST: stable32${DOMAIN_SUFFIX}
+      ADDITIONAL_APPS_PATH:
+      NEXTCLOUD_TRUSTED_DOMAINS:
+      PRIMARY: ${PRIMARY:-local}
+      PHP_XDEBUG_MODE: ${PHP_XDEBUG_MODE:-develop}
+    volumes:
+      - '${STABLE_ROOT_PATH}/stable32:/var/www/html'
+      - '${STABLE_ROOT_PATH}/stable32/apps-extra:/var/www/html/apps-extra'
+      - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - /var/www/html/data
+      - /var/www/html/config
+      - /var/www/html/apps-writable
+      - ./data/skeleton/:/skeleton
+      - ./data/shared:/shared
+    depends_on:
+      - database-${SQL:-mysql}
+      - redis
+      - mail
+      - ${PROXY_SERVICE:-proxy}
+
+  database-sqlite:
+    image: rwgrim/docker-noop
+
+  database-mysql:
+    image: mariadb:10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: 'nextcloud'
+      MYSQL_PASSWORD: 'nextcloud'
+      MYSQL_USER: 'nextcloud'
+      MYSQL_DATABASE: 'nextcloud'
+    command: [
+      '--wait_timeout=28800',
+    ]
+    ports:
+      - "${IP_BIND:-127.0.0.1}:${PORTBASE:-800}2:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+
+  database-mariadb-primary:
+    image: docker.io/bitnami/mariadb:10.6
+    ports:
+      - "${IP_BIND:-127.0.0.1}:3306:3306"
+    volumes:
+      - 'mariadb_primary_data:/bitnami/mariadb'
+    environment:
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_ROOT_PASSWORD=nextcloud
+      - MARIADB_USER=nextcloud
+      - MARIADB_PASSWORD=nextcloud
+      - MARIADB_DATABASE=nextcloud
+
+  database-mariadb-replica:
+    image: docker.io/bitnami/mariadb:10.6
+    ports:
+      - "${IP_BIND:-127.0.0.1}:3306:3306"
+    depends_on:
+      - database-mariadb-primary
+    environment:
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_MASTER_HOST=database-mariadb-primary
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      - MARIADB_MASTER_ROOT_PASSWORD=nextcloud
+      # This can be useful for testing but should be enabled only after a setup is completed
+      # - MARIADB_MASTER_DELAY=10
+
+  database-maxscale:
+    image: mariadb/maxscale:latest
+    depends_on:
+      - database-mariadb-primary
+      - database-mariadb-replica
+    volumes:
+      - './docker/maxscale/my-maxscale.cnf:/etc/maxscale.cnf.d/my-maxscale.cnf'
+    ports:
+      - "${IP_BIND:-127.0.0.1}:3306:3306"
+
+  database-pgsql:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "${IP_BIND:-127.0.0.1}:${PORTBASE:-800}2:5432"
+    volumes:
+      - postgres:/var/lib/postgresql
+
+  database-oci:
+    image: gvenzl/oracle-free:23
+    environment:
+      ORACLE_PASSWORD: oracle
+    ports:
+      - "${IP_BIND:-127.0.0.1}:1521:1521"
+    volumes:
+      - oracle:/opt/oracle/oradata
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      VIRTUAL_HOST: "pgadmin${DOMAIN_SUFFIX}"
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@nextcloud.local
+      PGADMIN_DEFAULT_PASSWORD: postgres
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_SERVER_JSON_FILE: /pgadmin4/config/servers.json
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    volumes:
+      - "./data/pgadmin/config:/pgadmin4/config"
+    depends_on:
+      - ${PROXY_SERVICE:-proxy}
+
+  redis:
+    image: redis:8
+    volumes:
+      - redis:/data
+
+  ldap:
+    image: osixia/openldap
+    command: --copy-service --loglevel debug
+    expose:
+      - 389
+      - 636
+    ports:
+      - "${IP_BIND:-127.0.0.1}:3389:389"
+    environment:
+      LDAP_DOMAIN: planetexpress.com
+      LDAP_BASE_DN: dc=planetexpress,dc=com
+    volumes:
+      - ./data/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom
+
+  phpmyadmin:
+    image: phpmyadmin
+    environment:
+      VIRTUAL_HOST: "phpmyadmin${DOMAIN_SUFFIX}"
+      PMA_ARBITRARY: 1
+      PMA_HOST: database-mysql
+      PMA_USER: root
+      PMA_PASSWORD: nextcloud
+
+  ldapadmin:
+    image: osixia/phpldapadmin
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: ldap
+      PHPLDAPADMIN_HTTPS: 'false'
+    ports:
+      - "${IP_BIND:-127.0.0.1}:${PORTBASE:-800}8:80"
+
+  saml:
+    image: unicon/simplesamlphp
+    volumes:
+      - ./docker/configs/var-simplesamlphp/config:/var/simplesamlphp/config
+      - ./docker/configs/var-simplesamlphp/cert:/var/simplesamlphp/cert
+      - ./docker/configs/var-simplesamlphp/metadata:/var/simplesamlphp/metadata
+    environment:
+      VIRTUAL_HOST: "sso${DOMAIN_SUFFIX}"
+    expose:
+      - 80
+
+  mail:
+    image: ghcr.io/juliusknorr/nextcloud-dev-mailhog:latest
+    environment:
+      VIRTUAL_HOST: "mail${DOMAIN_SUFFIX}"
+      VIRTUAL_PORT: 8025
+
+  imap:
+    image: ghcr.io/christophwurst/docker-imap-devel:latest
+    environment:
+      MAILNAME: example.net
+      MAIL_ADDRESS: admin@example.net
+      MAIL_PASS: admin
+
+  smb:
+    image: dperson/samba
+    ports:
+      - "${IP_BIND:-127.0.0.1}:139:139"
+      - "${IP_BIND:-127.0.0.1}:445:445"
+    environment:
+      # -u "<username;password>[;ID;group;GID]"
+      USER: "admin;admin"
+      USER2: "user1;user1"
+      USER3: "user2;user2"
+      # -s "<name;/path>[;browse;readonly;guest;users;admins;writelist;comment]"
+      SHARE: "public;/smbmount;yes;no;yes;all;admin;admin"
+      SHARE2: "user1;/smb/user1;yes;no;no;user1"
+      SHARE3: "user2;/smb/user2;yes;no;no;user2"
+    volumes:
+      - smb:/smbmount
+      - smbhomes:/smb
+
+  blackfire:
+    image: blackfire/blackfire:2
+    ports:
+      - "${IP_BIND:-127.0.0.1}:8307:8307"
+    environment:
+      - BLACKFIRE_SERVER_ID
+      - BLACKFIRE_SERVER_TOKEN
+      - BLACKFIRE_CLIENT_ID
+      - BLACKFIRE_CLIENT_TOKEN
+      - BLACKFIRE_DISABLE_LEGACY_PORT=yes
+
+  collabora:
+    image: collabora/code:latest
+    expose:
+      - 9980
+    cap_add:
+      - MKNOD
+    environment:
+      aliasgroup1: http://nextcloud${DOMAIN_SUFFIX}
+      aliasgroup2: http://gs1${DOMAIN_SUFFIX}
+      aliasgroup3: http://gs2${DOMAIN_SUFFIX}
+      aliasgroup4: http://stable20${DOMAIN_SUFFIX}
+      aliasgroup5: http://stable24${DOMAIN_SUFFIX}
+      aliasgroup6: http://stable25${DOMAIN_SUFFIX}
+      aliasgroup7: http://stable26${DOMAIN_SUFFIX}
+      aliasgroup8: http://stable27${DOMAIN_SUFFIX}
+      aliasgroup9: http://stable28${DOMAIN_SUFFIX}
+      aliasgroup10: http://stable29${DOMAIN_SUFFIX}
+      aliasgroup11: http://stable30${DOMAIN_SUFFIX}
+      aliasgroup12: http://stable31${DOMAIN_SUFFIX}
+      aliasgroup13: http://stable32${DOMAIN_SUFFIX}
+      dictionaries: de_DE en_US en_GB
+      username: admin
+      password: admin
+      VIRTUAL_HOST: collabora${DOMAIN_SUFFIX}
+      VIRTUAL_PORT: 9980
+      VIRTUAL_PROTO: http
+      server_name: collabora${DOMAIN_SUFFIX}
+      extra_params: "--o:ssl.enable=false --o:net.frame_ancestors=*${DOMAIN_SUFFIX} --o:home_mode.enable=true --o:ssl.termination=false ${COLLABORA_PARAMS:-}"
+
+  codedev:
+    privileged: true
+    build:
+      context: ./docker/codedev
+    environment:
+      VIRTUAL_HOST: "codedev${DOMAIN_SUFFIX}"
+      VIRTUAL_PORT: 9980
+    volumes:
+      - /Users/julius/repos/collaboraonline:/collabora
+    command: >
+      tail -f /dev/null
+
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    environment:
+      VIRTUAL_HOST: onlyoffice${DOMAIN_SUFFIX}
+      USE_UNAUTHORIZED_STORAGE: "true"
+      JWT_SECRET: secret
+    expose:
+      - '80'
+    volumes:
+      - document_data:/var/www/onlyoffice/Data
+      - document_log:/var/log/onlyoffice
+
+  minio:
+    image: minio/minio
+    environment:
+      VIRTUAL_HOST: minio${DOMAIN_SUFFIX}
+      VIRTUAL_PORT: 9001
+      MINIO_ROOT_USER: nextcloud
+      MINIO_ROOT_PASSWORD: nextcloud
+      MINIO_BROWSER_REDIRECT_URL: ${PROTOCOL}://minio${DOMAIN_SUFFIX}
+    volumes:
+      - objectstorage_minio:/data
+    command: server /data --console-address :9001
+
+  elasticsearch:
+    build:
+      context: ./docker
+      dockerfile: elasticsearch/Dockerfile
+    environment:
+      - ELASTIC_PASSWORD=elastic
+      - discovery.type=single-node
+      - http.port=9200
+      - http.cors.enabled=true
+      - http.cors.allow-origin=http://localhost:1358,http://127.0.0.1:1358,http://elasticsearch-ui.dev.local
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+      - VIRTUAL_HOST=elasticsearch${DOMAIN_SUFFIX}
+      - VIRTUAL_PORT=9200
+      - VIRTUAL_PROTO=http
+    expose:
+      - 9200
+      - 9300
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  elasticsearch-ui:
+    image: appbaseio/dejavu
+    ports:
+      - "${IP_BIND:-127.0.0.1}:1358:1358"
+    expose:
+      - 1358
+    environment:
+      VIRTUAL_HOST: elasticsearch-ui${DOMAIN_SUFFIX}
+      VIRTUAL_PORT: 1358
+      VIRTUAL_PROTO: http
+
+
+  push:
+    image: ghcr.io/juliusknorr/nextcloud-dev-push:latest
+    environment:
+      RUST_LOG: debug
+      VIRTUAL_HOST: push${DOMAIN_SUFFIX}
+      VIRTUAL_PORT: 7867
+      DATABASE_URL: mysql://root:nextcloud@database-mysql/nextcloud
+      REDIS_URL: redis://redis
+      NEXTCLOUD_URL: http://nextcloud
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    expose:
+      - 8080
+    volumes:
+      - ./docker/configs/keycloak:/opt/keycloak/data/import
+    command: start-dev --import-realm
+    environment:
+      VIRTUAL_HOST: "keycloak${DOMAIN_SUFFIX}"
+      VIRTUAL_PORT: 8080
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      PROXY_ADDRESS_FORWARDING: "true"
+      KC_PROXY: edge
+
+  av:
+    image: mkodockx/docker-clamav:alpine
+    container_name: nextav
+    restart: unless-stopped
+    volumes:
+      - clam:/var/lib/clamav
+
+  portal:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      VIRTUAL_HOST: portal${DOMAIN_SUFFIX}
+      SQL: 'mysql'
+      GS_MODE: master
+    volumes:
+      - '${STABLE_ROOT_PATH}/server:/var/www/html'
+      - '${STABLE_ROOT_PATH}/server/apps-extra:/var/www/html/apps-extra'
+      - /var/www/html/data
+      - /var/www/html/config
+      - ./data/skeleton/:/skeleton
+    depends_on:
+      - ${PROXY_SERVICE:-proxy}
+      - database-${SQL:-mysql}
+      - lookup
+      - redis
+      - mail
+
+  gs1:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      VIRTUAL_HOST: gs1${DOMAIN_SUFFIX}
+      SQL: 'mysql'
+      GS_MODE: slave
+    volumes:
+      - '${STABLE_ROOT_PATH}/server:/var/www/html'
+      - '${STABLE_ROOT_PATH}/server/apps-extra:/var/www/html/apps-extra'
+      - /var/www/html/data
+      - /var/www/html/config
+      - ./data/skeleton/:/skeleton
+    depends_on:
+      - ${PROXY_SERVICE:-proxy}
+      - portal
+      - database-${SQL:-mysql}
+      - lookup
+      - redis
+      - mail
+
+  gs2:
+    image: ghcr.io/juliusknorr/nextcloud-dev-php${PHP_VERSION:-82}:latest
+    environment:
+      VIRTUAL_HOST: gs2${DOMAIN_SUFFIX}
+      SQL: 'mysql'
+      GS_MODE: slave
+    volumes:
+      - '${STABLE_ROOT_PATH}/server:/var/www/html'
+      - '${STABLE_ROOT_PATH}/server/apps-extra:/var/www/html/apps-extra'
+      - /var/www/html/data
+      - /var/www/html/config
+      - ./data/skeleton/:/skeleton
+    depends_on:
+      - ${PROXY_SERVICE:-proxy}
+      - portal
+      - database-${SQL:-mysql}
+      - lookup
+      - redis
+      - mail
+
+  lookup:
+    image: ghcr.io/juliusknorr/nextcloud-dev-lookupserver:latest
+    environment:
+      VIRTUAL_HOST: "lookup${DOMAIN_SUFFIX}"
+    # volumes:
+    #  - '${STABLE_ROOT_PATH}/lookupserver:/var/www/html'
+  tinyproxy:
+    image: docker.io/kalaksi/tinyproxy
+    cap_drop:
+      - ALL
+    ports:
+      - "${IP_BIND:-127.0.0.1}:8888:8888"
+    environment:
+      MAX_CLIENTS: 100
+      ALLOWED_NETWORKS: 0.0.0.0/0
+      # One of Critical, Error, Warning, Notice, Connect, Info
+      LOG_LEVEL: Notice
+      # Maximum number of seconds idle connections are allowed to remain open
+      TIMEOUT: 900
+      # Username for BasicAuth
+      # AUTH_USER: ''
+      # Password for BasicAuth (letters and digits only)
+      # Prefer secrets-mechanisms instead of environment variables.
+      # AUTH_PASSWORD: ''
+    healthcheck:
+      test: ["CMD", "curl", "-I", "-H", "Host: tinyproxy.stats", "${PROTOCOL}://nextcloud${DOMAIN_SUFFIX}/"]
+      interval: 5m
+      timeout: 10s
+      retries: 1
+
+
+  previews_hpb:
+    image: ghcr.io/nextcloud-releases/aio-imaginary:latest
+    ports:
+      - "${IP_BIND:-127.0.0.1}:8088:8088"
+    environment:
+      - PORT=8088
+
+  talk-signaling:
+    image: strukturag/nextcloud-spreed-signaling:latest
+    environment:
+      VIRTUAL_HOST: "talk-signaling${DOMAIN_SUFFIX}"
+      HTTP_LISTEN: "0.0.0.0:80"
+      HASH_KEY: "11111111111111111111111111111111"
+      BLOCK_KEY: "22222222222222222222222222222222"
+      USE_JANUS: 1
+      JANUS_URL: "ws://talk-janus:8188"
+      SKIP_VERIFY: 1
+      BACKENDS_ALLOWALL: 1
+      BACKENDS_ALLOWALL_SECRET: "1234"
+      INTERNAL_SHARED_SECRET_KEY: "4567"
+
+  talk-janus:
+    image: ghcr.io/juliusknorr/nextcloud-dev-talk-janus:latest
+
+  talk-recording:
+    image: ghcr.io/nextcloud-releases/aio-talk-recording:latest
+    environment:
+      NC_DOMAIN: "nextcloud${DOMAIN_SUFFIX}"
+      ALLOW_ALL: "true"
+      HPB_PROTOCOL: "${PROTOCOL:-http}"
+      HPB_DOMAIN: "talk-signaling${DOMAIN_SUFFIX}"
+      HPB_PATH : ""
+      SKIP_VERIFY: "true"
+      RECORDING_SECRET: "6789"
+      INTERNAL_SECRET: "4567"
+      VIRTUAL_HOST: "talk-recording${DOMAIN_SUFFIX}"
+      VIRTUAL_PORT: 1234
+    shm_size: 2147483648
+
+  appapi-dsp:
+    image: ghcr.io/nextcloud/nextcloud-appapi-dsp:release
+    container_name: nextcloud-appapi-dsp-http
+    network_mode: ${NETWORK_MODE:-master_default}
+    volumes:
+      - ${DOCKER_SOCKET-/var/run/docker.sock}:/var/run/docker.sock
+    environment:
+      - NC_HAPROXY_PASSWORD=${NC_HAPROXY_PASSWORD:-some_secure_password}
+      - BIND_ADDRESS=${BIND_ADDRESS:-}
+      - HAPROXY_PORT=${HAPROXY_PORT:-2375}
+      - TIMEOUT_CONNECT=${TIMEOUT_CONNECT:-10s}
+      - TIMEOUT_CLIENT=${TIMEOUT_CLIENT:-30s}
+      - TIMEOUT_SERVER=${TIMEOUT_SERVER:-30s}
+      - EX_APPS_NET=${EX_APPS_NET:-ipv4@localhost}
+      - EX_APPS_COUNT=${EX_APPS_COUNT:-50}
+
+  appapi-dsp-https:
+    image: ghcr.io/nextcloud/nextcloud-appapi-dsp:release
+    container_name: nextcloud-appapi-dsp-https
+    network_mode: ${NETWORK_MODE:-host}
+    volumes:
+      - ${DOCKER_SOCKET-/var/run/docker.sock}:/var/run/docker.sock
+      - ${CERT_PATH:-./data/ssl/app_api/app_api.pem}:/certs/cert.pem
+    environment:
+      - NC_HAPROXY_PASSWORD=${NC_HAPROXY_PASSWORD:-some_secure_password}
+      - BIND_ADDRESS=${BIND_ADDRESS:-172.17.0.1}
+      - HAPROXY_PORT=${HAPROXY_PORT:-2375}
+      - TIMEOUT_CONNECT=${TIMEOUT_CONNECT:-10s}
+      - TIMEOUT_CLIENT=${TIMEOUT_CLIENT:-30s}
+      - TIMEOUT_SERVER=${TIMEOUT_SERVER:-30s}
+      - EX_APPS_NET=${EX_APPS_NET:-ipv4@localhost}
+      - EX_APPS_COUNT=${EX_APPS_COUNT:-50}
+
+
+volumes:
+  data:
+  config:
+  apps-writable:
+  mysql:
+  postgres:
+  oracle:
+  redis:
+  data2:
+  config2:
+  apps-writable2:
+  data3:
+  config3:
+  apps-writable3:
+  document_data:
+  document_log:
+  objectstorage_minio:
+  smb:
+  smbhomes:
+  elasticsearch_data:
+  clam:
+  mariadb_primary_data:
+
+networks:
+  default:
+    ipam:
+      driver: default
+      config:
+        - subnet: ${DOCKER_SUBNET:-192.168.21.0/24}
