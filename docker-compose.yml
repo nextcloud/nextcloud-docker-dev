@@ -1352,7 +1352,7 @@ services:
       - CMD-SHELL
       - pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}
       timeout: 5s
-    image: docker.io/library/postgres:16-alpine
+    image: docker.io/library/postgres:18-alpine
     restart: unless-stopped
     volumes:
     - authentik-database:/var/lib/postgresql/data
