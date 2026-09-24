@@ -135,7 +135,7 @@ jobs:
         if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
         working-directory: tests
         run: npx playwright test
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
         with:
           name: playwright-report-${{ matrix.container }}
