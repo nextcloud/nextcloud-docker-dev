@@ -1054,7 +1054,7 @@ services:
       - discovery.type=single-node
       - http.port=9200
       - http.cors.enabled=true
-      - http.cors.allow-origin=http://localhost:1358,http://127.0.0.1:1358,http://elasticsearch-ui.dev.local
+      - http.cors.allow-origin=http://localhost:1358,http://127.0.0.1:1358,http://elasticsearch-ui${DOMAIN_SUFFIX}
       - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
       - http.cors.allow-credentials=true
       - bootstrap.memory_lock=true
@@ -1063,8 +1063,9 @@ services:
       - VIRTUAL_HOST=elasticsearch${DOMAIN_SUFFIX}
       - VIRTUAL_PORT=9200
       - VIRTUAL_PROTO=http
+    ports:
+      - "9200:9200"
     expose:
-      - 9200
       - 9300
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
