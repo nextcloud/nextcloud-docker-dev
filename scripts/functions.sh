@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function get_docker_compose_command() {
     docker-compose version >/dev/null 2>/dev/null && DCC='docker-compose'

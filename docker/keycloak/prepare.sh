@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 KEYCLOAK_REALM_CONFIG="/opt/keycloak/data/import/Example-realm.json"
 PROTOCOL="${PROTOCOL:-http}"
