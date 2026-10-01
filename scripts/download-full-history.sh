@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env bash -e
 
 isShallow() {
     # Reference: https://stackoverflow.com/a/37533086
