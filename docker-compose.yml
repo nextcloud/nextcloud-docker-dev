@@ -642,9 +642,9 @@ services:
       - '${STABLE_ROOT_PATH}/stable31:/var/www/html'
       - '${STABLE_ROOT_PATH}/stable31/apps-extra:/var/www/html/apps-extra'
       - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - '${STABLE_ROOT_PATH}/stable31/apps-writable:/var/www/html/apps-writable'
       - /var/www/html/data
       - /var/www/html/config
-      - /var/www/html/apps-writable
       - ./data/skeleton/:/skeleton
       - ./data/additional.config.php:/var/www/html/config/additional.config.php:ro
       - ./data/shared:/shared
@@ -673,9 +673,9 @@ services:
       - '${STABLE_ROOT_PATH}/stable32:/var/www/html'
       - '${STABLE_ROOT_PATH}/stable32/apps-extra:/var/www/html/apps-extra'
       - '${ADDITIONAL_APPS_PATH:-./data/apps-extra}:/var/www/html/apps-shared'
+      - '${STABLE_ROOT_PATH}/stable31/apps-writable:/var/www/html/apps-writable'
       - /var/www/html/data
       - /var/www/html/config
-      - /var/www/html/apps-writable
       - ./data/skeleton/:/skeleton
       - ./data/additional.config.php:/var/www/html/config/additional.config.php:ro
       - ./data/shared:/shared
@@ -911,7 +911,7 @@ services:
       - "${IP_BIND:-127.0.0.1}:${PORTBASE:-800}8:80"
 
   saml:
-    image: unicon/simplesamlphp 
+    image: unicon/simplesamlphp
     volumes:
       - ./docker/configs/var-simplesamlphp/config:/var/simplesamlphp/config
       - ./docker/configs/var-simplesamlphp/cert:/var/simplesamlphp/cert
