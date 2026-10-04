@@ -11,3 +11,4 @@ allowing you to run `docker compose up` again from a clean slate.
 
 - You can use `docker compose logs -f` to follow the logs of all containers
 - You can use `docker compose logs -f nextcloud` to follow the logs of the Nextcloud container
+- For searching and visualizing the logs of all containers, the setup ships a Loki and Grafana stack, see [log aggregation](../tools/logs.md)

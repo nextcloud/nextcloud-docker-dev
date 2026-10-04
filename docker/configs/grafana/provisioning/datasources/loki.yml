@@ -1,0 +1,20 @@
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+    editable: false
+    jsonData:
+      maxLines: 5000
+      # clicking the request id of a log line opens all log entries of that request
+      derivedFields:
+        - name: reqId
+          matcherType: label
+          matcherRegex: reqId
+          datasourceUid: loki
+          url: '{log_type=~"nextcloud|access"} | reqId = `${__value.raw}`'
+          urlDisplayLabel: 'All log entries of this request'

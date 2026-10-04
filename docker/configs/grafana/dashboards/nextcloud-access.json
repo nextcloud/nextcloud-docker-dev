@@ -1,0 +1,1632 @@
+{
+  "uid": "nextcloud-access",
+  "title": "Access log",
+  "description": "Every HTTP request as logged by the nginx proxy, grouped by normalized route.",
+  "tags": [
+    "nextcloud",
+    "logs"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "schemaVersion": 39,
+  "version": 2,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "links": [
+    {
+      "type": "dashboards",
+      "title": "Logs",
+      "tags": [
+        "logs"
+      ],
+      "asDropdown": true,
+      "includeVars": false,
+      "keepTime": true,
+      "icon": "external link",
+      "tooltip": "",
+      "url": ""
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "vhost",
+        "label": "Host",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "loki"
+        },
+        "query": "label_values({log_type=\"access\"}, vhost)",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".+",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1
+      },
+      {
+        "name": "class",
+        "label": "Log: status",
+        "type": "custom",
+        "multi": false,
+        "includeAll": false,
+        "description": "Only applies to the slow request table and the request log",
+        "query": "All : .*,2xx : 2..,3xx : 3..,4xx : 4..,5xx : 5..",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": ".*"
+          },
+          {
+            "selected": false,
+            "text": "2xx",
+            "value": "2.."
+          },
+          {
+            "selected": false,
+            "text": "3xx",
+            "value": "3.."
+          },
+          {
+            "selected": false,
+            "text": "4xx",
+            "value": "4.."
+          },
+          {
+            "selected": false,
+            "text": "5xx",
+            "value": "5.."
+          }
+        ],
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".*"
+        }
+      },
+      {
+        "name": "slow",
+        "label": "Slow over (s)",
+        "type": "textbox",
+        "query": "1",
+        "current": {
+          "text": "1",
+          "value": "1"
+        }
+      },
+      {
+        "name": "search",
+        "label": "Search",
+        "description": "Only lines containing this text, applies to every panel",
+        "type": "textbox",
+        "query": "",
+        "current": {
+          "text": "",
+          "value": ""
+        }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "5xx",
+      "description": "Share of requests that failed with a server error",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "value": 0.001,
+                "color": "#fab219"
+              },
+              {
+                "value": 5,
+                "color": "#d03b3b"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "100 * (sum(count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status=~\"5..\" [$__range])) or vector(0)) / sum(count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` [$__range]))",
+          "queryType": "instant"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "4xx",
+      "description": "Share of requests rejected with a client error, without 499 (client closed the connection, normal for long polling)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 0
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "value": 10,
+                "color": "#fab219"
+              },
+              {
+                "value": 25,
+                "color": "#d03b3b"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "100 * (sum(count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status=~\"4..\" | status!=\"499\" [$__range])) or vector(0)) / sum(count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` [$__range]))",
+          "queryType": "instant"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "p95 response time",
+      "description": "Without Talk long polling and websockets",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 2,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "value": 1,
+                "color": "#fab219"
+              },
+              {
+                "value": 3,
+                "color": "#d03b3b"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "quantile_over_time(0.95, {log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status!=\"101\" | query!~`.*lookIntoFuture=1.*` | route!~`.*/signaling/\\{token\\}` | unwrap duration | __error__=\"\" [$__range]) by ()",
+          "queryType": "instant"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "stat",
+      "title": "Requests",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum(count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` [$__range])) or vector(0)",
+          "queryType": "instant"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "type": "timeseries",
+      "title": "Requests by status",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#666b75"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "1xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#666b75"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "2xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "3xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#86b6ef"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "499"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#666b75"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "4xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#fab219"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#d03b3b"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (class) (count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | label_format class=`{{ if eq .status \"499\" }}499{{ else }}{{ substr 0 1 .status }}xx{{ end }}` [$__auto]))",
+          "queryType": "range",
+          "legendFormat": "{{class}}"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "type": "timeseries",
+      "title": "Response time",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Without Talk long polling and websockets",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#3987e5"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "transparent",
+                "value": null
+              },
+              {
+                "color": "#fab219",
+                "value": 1
+              },
+              {
+                "color": "#d03b3b",
+                "value": 3
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "lineWidth": 2,
+            "showPoints": "never",
+            "spanNulls": true,
+            "thresholdsStyle": {
+              "mode": "dashed"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p50"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#86b6ef"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p99"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    6,
+                    4
+                  ]
+                }
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "queryType": "range",
+          "legendFormat": "p50",
+          "expr": "quantile_over_time(0.5, {log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status!=\"101\" | query!~`.*lookIntoFuture=1.*` | route!~`.*/signaling/\\{token\\}` | unwrap duration | __error__=\"\" [$__auto]) by ()"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "queryType": "range",
+          "legendFormat": "p95",
+          "expr": "quantile_over_time(0.95, {log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status!=\"101\" | query!~`.*lookIntoFuture=1.*` | route!~`.*/signaling/\\{token\\}` | unwrap duration | __error__=\"\" [$__auto]) by ()"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "queryType": "range",
+          "legendFormat": "p99",
+          "expr": "quantile_over_time(0.99, {log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status!=\"101\" | query!~`.*lookIntoFuture=1.*` | route!~`.*/signaling/\\{token\\}` | unwrap duration | __error__=\"\" [$__auto]) by ()"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "type": "table",
+      "title": "Failing routes",
+      "description": "4xx and 5xx responses, without 499",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 12
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Count",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true,
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^5\\d\\d$",
+                      "result": {
+                        "color": "#d03b3b",
+                        "index": 0
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^4\\d\\d$",
+                      "result": {
+                        "color": "#fab219",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Count"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 180
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Route"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "topk(20, sum by (status, method, vhost, route) (count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status=~\"[45]..\" | status!=\"499\" [$__range])))",
+          "queryType": "instant"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^Value.*",
+            "renamePattern": "Count"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "status": 0,
+              "method": 1,
+              "vhost": 2,
+              "route": 3,
+              "Count": 4
+            },
+            "renameByName": {
+              "status": "Status",
+              "method": "Method",
+              "vhost": "Host",
+              "route": "Route"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Count",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "type": "table",
+      "title": "Slowest routes",
+      "description": "Without Talk long polling and websockets",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "p95",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true,
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Route"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 120
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "transparent",
+                      "value": null
+                    },
+                    {
+                      "color": "#fab219",
+                      "value": 1
+                    },
+                    {
+                      "color": "#d03b3b",
+                      "value": 3
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "topk(20, quantile_over_time(0.95, {log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status!=\"101\" | query!~`.*lookIntoFuture=1.*` | route!~`.*/signaling/\\{token\\}` | unwrap duration | __error__=\"\" [$__range]) by (method, vhost, route))",
+          "queryType": "instant"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^Value.*",
+            "renamePattern": "p95"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "method": 0,
+              "vhost": 1,
+              "route": 2,
+              "p95": 3
+            },
+            "renameByName": {
+              "method": "Method",
+              "vhost": "Host",
+              "route": "Route"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "p95",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "type": "table",
+      "title": "Busiest routes",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "sortBy": [
+          {
+            "displayName": "Requests",
+            "desc": true
+          }
+        ],
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true,
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Requests"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 180
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge",
+                  "mode": "basic",
+                  "valueDisplayMode": "text"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#3987e5"
+                }
+              },
+              {
+                "id": "min",
+                "value": 0
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Route"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "topk(20, sum by (method, vhost, route) (count_over_time({log_type=\"access\", vhost=~\"$vhost\"} |= `$search` [$__range])))",
+          "queryType": "instant"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^Value.*",
+            "renamePattern": "Requests"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "method": 0,
+              "vhost": 1,
+              "route": 2,
+              "Requests": 3
+            },
+            "renameByName": {
+              "method": "Method",
+              "vhost": "Host",
+              "route": "Route"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Requests",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "table",
+      "title": "Requests slower than ${slow}s",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Without Talk long polling and websockets. The request id opens the matching Nextcloud log entries",
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "Duration",
+            "desc": true
+          }
+        ],
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true,
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 170
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^5\\d\\d$",
+                      "result": {
+                        "color": "#d03b3b",
+                        "index": 0
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^4\\d\\d$",
+                      "result": {
+                        "color": "#fab219",
+                        "index": 1
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Host"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 200
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "decimals",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Request id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 220
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Request id"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Nextcloud log entries of this request",
+                    "url": "/d/nextcloud-logs/nextcloud-logs?var-search=${__value.raw}&${__url_time_range}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Method"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Route"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Request id"
+            },
+            "properties": [
+              {
+                "id": "filterable",
+                "value": false
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status=~\"$class\" | status!=\"101\" | query!~`.*lookIntoFuture=1.*` | route!~`.*/signaling/\\{token\\}` | duration > $slow",
+          "queryType": "range",
+          "maxLines": 200
+        }
+      ],
+      "transformations": [
+        {
+          "id": "extractFields",
+          "options": {
+            "source": "labels",
+            "format": "json",
+            "replace": false
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "Time",
+                "status",
+                "method",
+                "vhost",
+                "route",
+                "duration",
+                "reqId"
+              ]
+            }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "targetField": "duration",
+                "destinationType": "number"
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Time": 0,
+              "status": 1,
+              "method": 2,
+              "vhost": 3,
+              "route": 4,
+              "duration": 5,
+              "reqId": 6
+            },
+            "renameByName": {
+              "status": "Status",
+              "method": "Method",
+              "vhost": "Host",
+              "route": "Route",
+              "duration": "Duration",
+              "reqId": "Request id"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "type": "logs",
+      "title": "Requests",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 46
+      },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "showCommonLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false,
+        "enableLogDetails": true,
+        "dedupStrategy": "none",
+        "sortOrder": "Descending"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{log_type=\"access\", vhost=~\"$vhost\"} |= `$search` | status=~\"$class\" | label_format level=`{{ if hasPrefix \"5\" .status }}error{{ else if and (hasPrefix \"4\" .status) (ne .status \"499\") }}warn{{ else }}info{{ end }}`, detected_level=`{{ if hasPrefix \"5\" .status }}error{{ else if and (hasPrefix \"4\" .status) (ne .status \"499\") }}warn{{ else }}info{{ end }}` | line_format `{{.status}} {{.method}} {{.vhost}}{{.path}}{{ if .query }}?{{.query}}{{ end }} · {{.duration}}s{{ if .reqId }} · {{.reqId}}{{ end }}`",
+          "queryType": "range",
+          "maxLines": 1000
+        }
+      ]
+    }
+  ]
+}

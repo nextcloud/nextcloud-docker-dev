@@ -17,3 +17,12 @@ docker compose up -d elasticsearch elasticsearch-ui
 - Address for accessing the UI: <http://elasticsearch-ui.local/>
 
 `sudo sysctl -w vm.max_map_count=262144`
+
+## Log aggregation
+
+```
+docker compose up -d grafana
+```
+
+Collects the logs of all containers of the setup into Loki and makes them searchable in Grafana at
+<http://grafana.local/>. See [log aggregation](../tools/logs.md) for details.

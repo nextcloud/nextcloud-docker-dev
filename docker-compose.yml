@@ -16,6 +16,8 @@ services:
       DHPARAM_GENERATION: "false"
       HTTPS_METHOD: "noredirect"
       HSTS: "off"
+      # logfmt with duration and request id for config.alloy, $ escapes $ for compose
+      LOG_FORMAT: 'time=$$time_iso8601 vhost=$$host method=$$request_method path=$$uri query="$$args" status=$$status bytes=$$body_bytes_sent duration=$$request_time upstream_time=$$upstream_response_time reqId=$$upstream_http_x_request_id remote_addr=$$remote_addr referer="$$http_referer" user_agent="$$http_user_agent"'
     cap_add:
       - SYS_ADMIN
     networks:
@@ -68,6 +70,8 @@ services:
           - talk-signaling${DOMAIN_SUFFIX}
           - talk-recording${DOMAIN_SUFFIX}
           - authentik${DOMAIN_SUFFIX}
+          - grafana${DOMAIN_SUFFIX}
+          - alloy${DOMAIN_SUFFIX}
     extra_hosts:
       - host.docker.internal:host-gateway
 
@@ -1405,6 +1409,58 @@ services:
     - ./authentik-custom-templates:/templates
     - ./authentik-certs:/certs
 
+
+  # Log aggregation, see docs/tools/logs.md
+  loki:
+    image: grafana/loki:3.7.0
+    command: -config.file=/etc/loki/config.yml -config.expand-env=true
+    environment:
+      LOKI_RETENTION_PERIOD: ${LOKI_RETENTION_PERIOD:-168h}
+    expose:
+      - 3100
+    volumes:
+      - ./docker/configs/loki/config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+
+  alloy:
+    image: grafana/alloy:v1.18.1
+    # reading the docker socket requires root
+    user: root
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    environment:
+      # config.alloy scopes the log collection with it
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME:-master}
+      VIRTUAL_HOST: "alloy${DOMAIN_SUFFIX}"
+      VIRTUAL_PORT: 12345
+    volumes:
+      - ./docker/configs/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - ${DOCKER_SOCKET-/var/run/docker.sock}:/var/run/docker.sock:ro
+      - alloy_data:/var/lib/alloy/data
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:13.2.2
+    environment:
+      VIRTUAL_HOST: "grafana${DOMAIN_SUFFIX}"
+      GF_SERVER_ROOT_URL: ${PROTOCOL:-http}://grafana${DOMAIN_SUFFIX}/
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes:
+      - ./docker/configs/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/configs/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - loki
+      - alloy
 volumes:
   data:
   config:
@@ -1428,6 +1484,9 @@ volumes:
   elasticsearch_data:
   clam:
   mariadb_primary_data:
+  loki_data:
+  alloy_data:
+  grafana_data:
   authentik-database:
     driver: local
 
