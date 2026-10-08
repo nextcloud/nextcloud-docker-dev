@@ -100,13 +100,13 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
       - name: Start containers with docker compose
-        if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
+        if: matrix.container == 'php83' || matrix.container == 'php84' || matrix.container == 'php85'
         run: |
           ./bootstrap.sh
           PHP_VERSION=$(echo ${{ matrix.container }} | sed -e 's/^php//')
           echo "PHP_VERSION=${PHP_VERSION}" >> .env
-          # exit if php version is not numeric or below 80 or above 84 to only test against supported ones in server master
-          if ! [[ $PHP_VERSION =~ ^[0-9]+$ ]] || [[ $PHP_VERSION -lt 80 ]] || [[ $PHP_VERSION -gt 84 ]]; then
+          # exit if php version is not numeric or below 83 or above 85 to only test against supported ones in server master
+          if ! [[ $PHP_VERSION =~ ^[0-9]+$ ]] || [[ $PHP_VERSION -lt 83 ]] || [[ $PHP_VERSION -gt 85 ]]; then
             exit 0
           fi
           docker compose up -d nextcloud
@@ -119,25 +119,30 @@ jobs:
             sleep 1
           done
           curl http://nextcloud.local/status.php
+          if ! curl -s http://nextcloud.local/index.php/login | grep -q 'Login'; then
+            echo "::error::Nextcloud did not come up within 5 minutes"
+            docker compose logs nextcloud | tail -100
+            exit 1
+          fi
       - uses: actions/setup-node@v6
-        if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
+        if: matrix.container == 'php83' || matrix.container == 'php84' || matrix.container == 'php85'
         with:
           node-version: latest
       - name: Install dependencies
-        if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
+        if: matrix.container == 'php83' || matrix.container == 'php84' || matrix.container == 'php85'
         working-directory: tests
         run: npm ci
       - name: Install Playwright Browsers
-        if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
+        if: matrix.container == 'php83' || matrix.container == 'php84' || matrix.container == 'php85'
         timeout-minutes: 15
         working-directory: tests
         run: npx playwright install --with-deps
       - name: Run Playwright tests
-        if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
+        if: matrix.container == 'php83' || matrix.container == 'php84' || matrix.container == 'php85'
         working-directory: tests
         run: npx playwright test
       - uses: actions/upload-artifact@v6
-        if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
+        if: matrix.container == 'php83' || matrix.container == 'php84' || matrix.container == 'php85'
         with:
           name: playwright-report-${{ matrix.container }}
           path: tests/playwright-report/
