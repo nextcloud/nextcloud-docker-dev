@@ -129,6 +129,7 @@ jobs:
         run: npm ci
       - name: Install Playwright Browsers
         if: matrix.container == 'php82' || matrix.container == 'php83' || matrix.container == 'php84'
+        timeout-minutes: 15
         working-directory: tests
         run: npx playwright install --with-deps
       - name: Run Playwright tests
