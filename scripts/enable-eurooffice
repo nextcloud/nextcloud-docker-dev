@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -e
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+# shellcheck source=example.env
+source "${SCRIPT_DIR}/../.env"
+# shellcheck source=scripts/functions.sh
+source "${SCRIPT_DIR}/functions.sh"
+
+if [ -z "$1" ]
+then
+  CONTAINER=nextcloud
+else
+  CONTAINER=$1
+fi
+
+function occ() {
+    docker_compose exec "$CONTAINER" sudo -E -u www-data "./occ" "$@"
+}
+
+echo "Setting up Euro-Office with eurooffice$DOMAIN_SUFFIX on $CONTAINER"
+docker_compose up -d eurooffice
+occ app:enable eurooffice --force
+occ config:app:set eurooffice DocumentServerUrl --value="$PROTOCOL://eurooffice$DOMAIN_SUFFIX"
+occ config:app:set eurooffice jwt_secret --value="secret-key-nextcloud-eurooffice-jwt"
+occ config:app:set eurooffice DocumentServerInternalUrl --value="http://eurooffice/"
+occ config:app:set eurooffice StorageUrl --value="http://${CONTAINER}${DOMAIN_SUFFIX}/"
+occ eurooffice:documentserver --check
+
+docker_compose exec eurooffice supervisorctl start example

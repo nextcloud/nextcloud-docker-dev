@@ -51,6 +51,7 @@ services:
           - imap${DOMAIN_SUFFIX}
           - collabora${DOMAIN_SUFFIX}
           - codedev${DOMAIN_SUFFIX}
+          - eurooffice${DOMAIN_SUFFIX}
           - onlyoffice${DOMAIN_SUFFIX}
           - proxy${DOMAIN_SUFFIX}
           - hpb${DOMAIN_SUFFIX}
@@ -1007,6 +1008,16 @@ services:
       - /Users/julius/repos/collaboraonline:/collabora
     command: >
       tail -f /dev/null
+
+  eurooffice:
+    image: ghcr.io/euro-office/documentserver:latest
+    environment:
+      VIRTUAL_HOST: eurooffice${DOMAIN_SUFFIX}
+      USE_UNAUTHORIZED_STORAGE: "true"
+      JWT_SECRET: secret-key-nextcloud-eurooffice-jwt
+      EXAMPLE_ENABLED: true
+    expose:
+      - '80'
 
   onlyoffice:
     image: onlyoffice/documentserver:latest
