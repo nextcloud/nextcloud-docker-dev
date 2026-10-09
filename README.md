@@ -14,6 +14,7 @@ Nextcloud's development environment using Docker Compose providing a large varie
 - 👥 LDAP with example user data, Keycloak
 - ✉ Mailhog for testing mail sending
 - 🚀 Blackfire, Xdebug for profiling and debugging
+- 🔍 Loki, Alloy and Grafana for collecting and searching the logs of the whole setup
 - 📄 Lots of integrating service containers: Collabora Online, Onlyoffice, Elasticsearch, ...
 
 ## Tutorial

@@ -1,0 +1,330 @@
+// The nextcloud containers mix nextcloud.log, cron, xdebug and apache output on stdout
+// (docker/bin/bootstrap.sh), the log_type label separates these formats again.
+
+logging {
+	level  = "warn"
+	format = "logfmt"
+}
+
+// shows what every pipeline stage does to a line in the alloy web interface
+livedebugging {
+	enabled = true
+}
+
+discovery.docker "containers" {
+	host             = "unix:///var/run/docker.sock"
+	refresh_interval = "5s"
+
+	// COMPOSE_PROJECT_NAME is passed in by docker-compose.yml
+	filter {
+		name   = "label"
+		values = ["com.docker.compose.project=" + sys.env("COMPOSE_PROJECT_NAME")]
+	}
+}
+
+discovery.relabel "containers" {
+	targets = discovery.docker.containers.targets
+
+	// docker reports the name with a leading slash
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex         = "/?(.*)"
+		target_label  = "container"
+	}
+
+	// the service name survives a recreate, the container name does not
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+		target_label  = "service"
+	}
+}
+
+loki.source.docker "containers" {
+	host       = "unix:///var/run/docker.sock"
+	targets    = discovery.relabel.containers.output
+	labels     = {"job" = "docker"}
+	forward_to = [loki.process.containers.receiver]
+}
+
+loki.process "containers" {
+	forward_to = [loki.write.loki.receiver]
+
+	// `tail --follow` prints a "==> /path <==" banner when it switches file
+	stage.drop {
+		expression          = `^==> .* <==$`
+		drop_counter_reason = "tail_file_header"
+	}
+
+	stage.match {
+		selector = `{container=~".+"} |~ "^\\{.*\"reqId\""`
+
+		stage.json {
+			expressions = {
+				time       = "time",
+				level      = "to_string(level)",
+				app        = "app",
+				reqId      = "reqId",
+				user       = "user",
+				method     = "method",
+				url        = "url",
+				scriptName = "scriptName",
+				remoteAddr = "remoteAddr",
+				userAgent  = "userAgent",
+				version    = "version",
+				exception  = "exception.Exception",
+			}
+		}
+
+		// nextcloud writes numeric levels, grafana colours by name
+		stage.template {
+			source   = "level"
+			template = `{{ if eq .Value "0" }}debug{{ else if eq .Value "1" }}info{{ else if eq .Value "2" }}warn{{ else if eq .Value "3" }}error{{ else if eq .Value "4" }}fatal{{ else }}unknown{{ end }}`
+		}
+
+		stage.static_labels {
+			values = {log_type = "nextcloud"}
+		}
+
+		// only bounded values become labels, everything else multiplies the streams
+		stage.labels {
+			values = {
+				level = "",
+				app   = "",
+			}
+		}
+
+		stage.structured_metadata {
+			values = {
+				reqId      = "",
+				user       = "",
+				method     = "",
+				url        = "",
+				scriptName = "",
+				remoteAddr = "",
+				userAgent  = "",
+				version    = "",
+				exception  = "",
+			}
+		}
+
+		stage.timestamp {
+			source            = "time"
+			format            = "RFC3339"
+			fallback_formats  = ["RFC3339Nano"]
+			action_on_failure = "fudge"
+		}
+	}
+
+	// proxy access log in logfmt (LOG_FORMAT in docker-compose.yml), the only one with a duration
+	stage.match {
+		selector = `{service="proxy"} |~ "time=[0-9]{4}-"`
+
+		// nginx runs under forego there, which prefixes every line with the process name
+		stage.replace {
+			expression = `^\S+\s+\| `
+			replace    = ""
+		}
+
+		stage.logfmt {
+			mapping = {
+				time          = "",
+				vhost         = "",
+				method        = "",
+				path          = "",
+				query         = "",
+				status        = "",
+				bytes         = "",
+				duration      = "",
+				upstream_time = "",
+				reqId         = "",
+				remote_addr   = "",
+				user_agent    = "",
+			}
+		}
+
+		// the raw path is unique per room, file and user, route replaces only those parts
+		stage.template {
+			source   = "route"
+			template = "{{ .path }}"
+		}
+
+		stage.replace {
+			source     = "route"
+			expression = `^(?:/remote\.php/dav/[a-z]+/)(.+)$`
+			replace    = "{path}"
+		}
+
+		stage.replace {
+			source     = "route"
+			expression = `^(?:/remote\.php/webdav/)(.+)$`
+			replace    = "{path}"
+		}
+
+		// listed explicitly, a blanket rule would also rewrite fixed endpoints like /signaling/backend
+		stage.replace {
+			source     = "route"
+			expression = `^(?:/ocs/v[0-9]\.php/apps/spreed/api/v[0-9]+/(?:room|chat|call|reaction|poll|bot|breakout-rooms|recording)/)([^/]+)`
+			replace    = "{token}"
+		}
+
+		stage.replace {
+			source     = "route"
+			expression = `^(?:/ocs/v[0-9]\.php/apps/spreed/api/v[0-9]+/signaling/)([a-z0-9]{8,})$`
+			replace    = "{token}"
+		}
+
+		stage.replace {
+			source     = "route"
+			expression = `^(?:/s/)([^/]+)`
+			replace    = "{token}"
+		}
+
+		stage.replace {
+			source     = "route"
+			expression = `^(?:/index\.php/avatar/)([^/]+)`
+			replace    = "{user}"
+		}
+
+		stage.replace {
+			source     = "route"
+			expression = `/([0-9]+)(?:/|$)`
+			replace    = "{id}"
+		}
+
+		stage.replace {
+			source     = "route"
+			expression = `^(.+)\.(?:js|mjs|css|woff2?|ttf|otf|png|jpe?g|gif|svg|ico|map)$`
+			replace    = "{static}"
+		}
+
+		stage.static_labels {
+			values = {log_type = "access"}
+		}
+
+		// the proxy serves every hostname, so the vhost is what separates the instances
+		stage.labels {
+			values = {vhost = ""}
+		}
+
+		stage.structured_metadata {
+			values = {
+				method        = "",
+				path          = "",
+				query         = "",
+				route         = "",
+				status        = "",
+				bytes         = "",
+				duration      = "",
+				upstream_time = "",
+				reqId         = "",
+				remote_addr   = "",
+				user_agent    = "",
+			}
+		}
+
+		stage.timestamp {
+			source            = "time"
+			format            = "RFC3339"
+			action_on_failure = "fudge"
+		}
+	}
+
+	// includes internal traffic that never passes the proxy, e.g. from the signaling server
+	stage.match {
+		selector = `{container=~".+"} !~ "^\\{" |~ "\" [0-9]{3} [0-9-]+"`
+
+		stage.regex {
+			expression = `"(?P<method>[A-Z]+) (?P<path>[^ "]+)[^"]*" (?P<status>\d{3}) (?P<bytes>\S+)`
+		}
+
+		stage.static_labels {
+			values = {log_type = "apache_access"}
+		}
+
+		stage.structured_metadata {
+			values = {
+				method = "",
+				path   = "",
+				status = "",
+				bytes  = "",
+			}
+		}
+	}
+
+	// the apache error log carries php warnings and fatals, which never reach nextcloud.log
+	stage.match {
+		selector = `{container=~".+"} |~ "^\\[[^\\]]+\\] \\[[a-z_]+:[a-z0-9]+\\]"`
+
+		stage.regex {
+			expression = `^\[[^\]]+\] \[(?P<module>[a-z_]+):(?P<level>[a-z0-9]+)\]`
+		}
+
+		stage.template {
+			source   = "level"
+			template = `{{ if or (eq .Value "emerg") (eq .Value "alert") (eq .Value "crit") }}fatal{{ else if eq .Value "notice" }}info{{ else if hasPrefix "trace" .Value }}debug{{ else }}{{ .Value }}{{ end }}`
+		}
+
+		stage.static_labels {
+			values = {log_type = "apache_error"}
+		}
+
+		stage.labels {
+			values = {level = ""}
+		}
+
+		stage.structured_metadata {
+			values = {module = ""}
+		}
+	}
+
+	// xdebug prefixes its lines with the process id
+	stage.match {
+		selector = `{container=~".+"} |~ "^\\[[0-9]+\\] "`
+
+		stage.static_labels {
+			values = {log_type = "xdebug"}
+		}
+	}
+
+	// janus prefixes everything but info, mapped to the nextcloud level names so {level="error"} spans the setup
+	stage.match {
+		selector = `{service="talk-janus"} |~ "\\[(FATAL|ERR|WARN)\\]"`
+
+		stage.regex {
+			expression = `\[(?P<level>FATAL|ERR|WARN)\]`
+		}
+
+		stage.template {
+			source   = "level"
+			template = `{{ if eq .Value "ERR" }}error{{ else }}{{ ToLower .Value }}{{ end }}`
+		}
+
+		stage.labels {
+			values = {level = ""}
+		}
+	}
+
+	// the recording server logs in pythons default format, "LEVEL:logger:message"
+	stage.match {
+		selector = `{service="talk-recording"} |~ "^(DEBUG|INFO|WARNING|ERROR|CRITICAL):"`
+
+		stage.regex {
+			expression = `^(?P<level>DEBUG|INFO|WARNING|ERROR|CRITICAL):`
+		}
+
+		stage.template {
+			source   = "level"
+			template = `{{ if eq .Value "WARNING" }}warn{{ else if eq .Value "CRITICAL" }}fatal{{ else }}{{ ToLower .Value }}{{ end }}`
+		}
+
+		stage.labels {
+			values = {level = ""}
+		}
+	}
+}
+
+loki.write "loki" {
+	endpoint {
+		url = "http://loki:3100/loki/api/v1/push"
+	}
+}
