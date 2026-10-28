@@ -12,7 +12,7 @@ The following hooks are currently available:
 ## Example for after-install.sh
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo 'Create some users'
 export OC_PASS=mycustomuser
@@ -22,7 +22,7 @@ occ user:add --password-from-env mycustomuser
 ## Example for before-start.sh
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo 'Always disable the firstrunwizard'
 occ app:disable firstrunwizard
