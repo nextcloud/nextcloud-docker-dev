@@ -60,7 +60,7 @@ ADDITIONAL_APPS_PATH=/path-to-your-app/
 ```
 Your app should be listed under the `Disabled` list.
 
-- https://docs.docker.com/engine/reference/commandline/container_exec/
-- https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#apps-commands-label
+- [https://docs.docker.com/engine/reference/commandline/container_exec/](https://docs.docker.com/engine/reference/commandline/container_exec/)
+- [https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#apps-commands-label](https://docs.nextcloud.com/server/latest/admin_manual/configuration_server/occ_command.html#apps-commands-label)
 
 
