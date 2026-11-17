@@ -17,11 +17,11 @@ Nextcloud's development environment using Docker Compose providing a large varie
 - 🔍 Loki, Alloy and Grafana for collecting and searching the logs of the whole setup
 - 📄 Lots of integrating service containers: Collabora Online, Onlyoffice, Elasticsearch, ...
 
-## Tutorial
+## Tutorials and Documentation
 
-You can find a step-by-step tutorial on how to use this setup in the [Nextcloud Developer Portal](https://nextcloud.com/developer/). It will guide you through the setup and show you how to use it for app development: https://cloud.nextcloud.com/s/iyNGp8ryWxc7Efa?path=%2F1%20Setting%20up%20a%20development%20environment
-
-In detail explanation of the setup and its features and configuration options can be found in the [nextcloud-docker-dev documentation](https://nextcloud.github.io/nextcloud-docker-dev/).
+You can find many step-by-step tutorials on how to use this setup, do app development, etc.
+- [Nextcloud Developer Portal](https://nextcloud.com/developer/)
+- [nextcloud-docker-dev documentation](https://nextcloud.github.io/nextcloud-docker-dev/)
 
 ## Quickstart
 
