@@ -789,8 +789,10 @@ services:
     image: ghcr.io/nextcloud/nextcloud-dev-noop:latest
 
   database-mysql:
-    image: mariadb:10.6
+    image: mariadb:10.11
     environment:
+      # Upgrades the system tables of a volume created by an older MariaDB.
+      MARIADB_AUTO_UPGRADE: '1'
       MYSQL_ROOT_PASSWORD: 'nextcloud'
       MYSQL_PASSWORD: 'nextcloud'
       MYSQL_USER: 'nextcloud'
