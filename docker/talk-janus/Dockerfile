@@ -1,7 +1,7 @@
 # Taken from https://github.com/strukturag/nextcloud-spreed-signaling/blob/54c1af7f4f1b598a9f2c1ae37b76b37e9dda3ee8/docker/janus/Dockerfile
 
 # Modified from https://gitlab.com/powerpaul17/nc_talk_backend/-/blob/dcbb918d8716dad1eb72a889d1e6aa1e3a543641/docker/janus/Dockerfile
-FROM alpine:3.18
+FROM alpine:3.23
 
 RUN apk add --no-cache curl autoconf automake libtool pkgconf build-base \
   glib-dev libconfig-dev libnice-dev jansson-dev openssl-dev zlib libsrtp-dev \
